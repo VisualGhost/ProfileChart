@@ -7,17 +7,20 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
 import com.profilechart.R;
 
 import java.util.List;
 
-public class ProfileChartView extends View implements ProfileChart {
+public class ProfileChartView extends View implements ProfileChart, View.OnTouchListener {
 
     private PaintFactory mPaintFactory;
     private AngleManager mAngleManager;
     private PortfolioDebug mDebug;
+    private int mSelectedSectorIndex = -1;
 
     private List<PortfolioBreakdown> mBreakdownList;
 
@@ -69,12 +72,13 @@ public class ProfileChartView extends View implements ProfileChart {
                 array.recycle();
             }
         }
+        setOnTouchListener(this);
         //TODO delete
         setBackgroundColor(Color.GRAY);
     }
 
     private void initDebug() {
-        mDebug = new PortfolioDebugImpl(mWidth, mArcRadius, mCircleMargin, mScale, mPercentageBottomMargin);
+        mDebug = new PortfolioDebugImpl(mWidth, mHeight, mArcRadius, mCircleMargin, mScale, mPercentageBottomMargin);
     }
 
     private void initWidgetParams(Context context, float scale) {
@@ -134,26 +138,28 @@ public class ProfileChartView extends View implements ProfileChart {
 
     private void drawStroke(Canvas canvas, int index, String instrumentName, String percentage) {
         //TODO remove if clause
-        Paint paint = index == 2 ? mPaintFactory.getSelectedPaint(index) : mPaintFactory.getPaint(index);
+        Paint paint = index == mSelectedSectorIndex ? mPaintFactory.getSelectedPaint(index) : mPaintFactory.getPaint(index);
         float startAngle = mAngleManager.getStartAngle(index);
         float sweepAngle = mAngleManager.getSweepAngle(index);
         canvas.drawArc(mRectF, startAngle, sweepAngle, false, paint);
         if (mIsDebugMode) {
             mDebug.drawLine(canvas, startAngle, sweepAngle);
-            mDebug.drawBox(canvas, startAngle, sweepAngle, instrumentName, percentage);
+            mDebug.drawTextBox(canvas, startAngle, sweepAngle, instrumentName, percentage);
+            mDebug.drawSector(canvas, startAngle, sweepAngle);
         }
     }
 
 
     private void drawOthers(Canvas canvas, int index, String instrumentName) {
-        Paint paint = mPaintFactory.getPaint(index);
+        Paint paint = index == mSelectedSectorIndex ? mPaintFactory.getSelectedPaint(index) : mPaintFactory.getPaint(index);
         float startAngle = mAngleManager.getStartAngle(index);
         float sweepAngle = mAngleManager.getTotalSweepAngle();
         canvas.drawArc(mRectF, startAngle, sweepAngle, false, paint);
         if (mIsDebugMode) {
             mDebug.drawLine(canvas, startAngle, sweepAngle);
             //TODO ?%
-            mDebug.drawBox(canvas, startAngle, sweepAngle, instrumentName, "?%");
+            mDebug.drawTextBox(canvas, startAngle, sweepAngle, instrumentName, "?%");
+            mDebug.drawSector(canvas, startAngle, sweepAngle);
         }
     }
 
@@ -164,5 +170,33 @@ public class ProfileChartView extends View implements ProfileChart {
             mAngleManager = new AngleManagerImpl(PieDirection.COUNTERCLOCKWISE, breakdownList);
             invalidate();
         }
+    }
+
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        if (mBreakdownList != null && mBreakdownList.size() > 0 && mAngleManager != null) {
+            float x = event.getX() - mWidth / 2;
+            float y = event.getY() - mHeight / 2;
+            float radius = (float) Math.sqrt(x * x + y * y);
+            float angle;
+            angle = (float) (Math.acos(x / radius) * 180 / Math.PI);
+            if (y > 0) {
+                angle = 360 - angle;
+            }
+            angle = mAngleManager.getDirection() == PieDirection.COUNTERCLOCKWISE ? -angle : angle;
+            int i = 0;
+            for (PortfolioBreakdown breakdown : mBreakdownList) {
+                if (breakdown.isDrawable()) {
+                    if (Math.abs(angle) >= mAngleManager.getAbsoluteStartAngle(i) && Math.abs(angle) <= mAngleManager.getAbsoluteEndAngle(i)) {
+                        break;
+                    }
+                    i++;
+                }
+            }
+            mSelectedSectorIndex = i;
+            invalidate();
+        }
+
+        return false;
     }
 }

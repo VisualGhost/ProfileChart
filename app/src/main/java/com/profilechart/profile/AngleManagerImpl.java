@@ -31,6 +31,21 @@ public class AngleManagerImpl implements AngleManager {
     }
 
     @Override
+    public float getAbsoluteStartAngle(int index) {
+        return Math.abs(getStartAngle(index));
+    }
+
+    @Override
+    public float getAbsoluteEndAngle(int index) {
+        return Math.abs(getEndAngle(index));
+    }
+
+    @Override
+    public float getEndAngle(int index) {
+        return mAngles[index + 1] * getMultiplier();
+    }
+
+    @Override
     public float getSweepAngle(final int index) {
         return (mAngles[index + 1] - mAngles[index]) * getMultiplier();
     }
@@ -38,5 +53,10 @@ public class AngleManagerImpl implements AngleManager {
     @Override
     public float getTotalSweepAngle() {
         return mAngles[mAngles.length - 1] - 360;
+    }
+
+    @Override
+    public PieDirection getDirection() {
+        return mPieDirection;
     }
 }

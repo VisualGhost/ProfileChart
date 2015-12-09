@@ -12,6 +12,8 @@ public interface PortfolioDebug {
 
     void drawLine(Canvas canvas, float startAngle, float sweetAngle);
 
-    void drawBox(Canvas canvas, float startAngle, float sweetAngle, String instrumentName, String percentage);
+    void drawTextBox(Canvas canvas, float startAngle, float sweetAngle, String instrumentName, String percentage);
+
+    void drawSector(Canvas canvas, float startAngle, float sweetAngle);
 
 }

@@ -16,7 +16,7 @@
         android:layout_width="@dimen/profile_chart_width"
         android:layout_height="@dimen/profile_chart_height"
         android:layout_centerInParent="true"
-        app:profileChartDebugMode="true"
+        app:profileChartDebugMode="false"
         app:profileChartScale="3"
         app:strokeRadius="@dimen/profile_chart_stroke_radius"
         app:strokeWidth="@dimen/profile_chart_stroke_width"
