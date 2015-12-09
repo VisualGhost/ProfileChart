@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ProfileChart">
+        <attr name="profileChartScale" format="float"/>
+        <attr name="strokeWidth" format="dimension"/>
+        <attr name="strokeWidthSelected" format="dimension"/>
+        <attr name="strokeRadius" format="dimension"/>
+        <attr name="profileChartDebugMode" format="boolean"/>
+        <attr name="circleMargin" format="dimension"/>
+        <attr name="percentageBottomMargin" format="dimension"/>
+    </declare-styleable>
+</resources>

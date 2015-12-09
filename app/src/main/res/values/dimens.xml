@@ -1,0 +1,14 @@
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    
+    <dimen name="profile_chart_width">200dp</dimen>
+    <dimen name="profile_chart_height">100dp</dimen>
+    <dimen name="profile_chart_stroke_radius">35dp</dimen>
+    <dimen name="profile_chart_stroke_width">5dp</dimen>
+    <dimen name="profile_chart_stroke_selected_width">10dp</dimen>
+    <dimen name="profile_chart_circle_margin">0dp</dimen>
+    <dimen name="profile_chart_percentage_bottom_margin">1dp</dimen>
+
+</resources>
