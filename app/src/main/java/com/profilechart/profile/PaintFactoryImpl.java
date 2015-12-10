@@ -20,22 +20,19 @@ public class PaintFactoryImpl implements PaintFactory {
 
     private PaintFactoryImpl(Context context, Builder builder) {
         mColorFactory = new ColorFactoryImpl(context);
-
         mArcPaint = new Paint();
         mSelectedArcPaint = new Paint();
         mPLInstrumentNamePaint = new Paint();
         mPLValuePaint = new Paint();
         mPercentagePaint = new Paint();
         mInstrumentNamePaint = new Paint();
-        mPLInstrumentNameTextPaint = new TextPaint(mPLInstrumentNamePaint);
-
         configArcPaint(mArcPaint, builder.mArcWidth);
         configArcPaint(mSelectedArcPaint, builder.mSelectedArcWidth);
         configPLInstrumentNamePaint(builder);
         configPLValuePaint(builder);
         configInstrumentNamePaint(builder);
         configPercentagePaint(builder);
-
+        mPLInstrumentNameTextPaint = new TextPaint(mPLInstrumentNamePaint);
         mPLValueIncTextColor = builder.mPLValueIncTextColor;
         mPLValueDecTextColor = builder.mPLValueDecTextColor;
     }
