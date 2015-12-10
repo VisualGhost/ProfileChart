@@ -10,6 +10,7 @@ import android.text.TextPaint;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
+import android.widget.Toast;
 
 import com.profilechart.R;
 
@@ -180,30 +181,30 @@ public class ProfileChartView extends View implements ProfileChart {
     }
 
     private void drawPLText(Canvas canvas, String instrumentName, String plValue) {
-        Paint plInstrumentNamePaint = mPaintFactory.getPLInstrumentNamePaint();
-        Paint plValuePaint = getPLValuePaint(plValue);
-
-
-        float instrumentTextWidth = plInstrumentNamePaint.measureText(instrumentName);
-        float valueTextWidth = plValuePaint.measureText(plValue);
-        float width = instrumentTextWidth + valueTextWidth;
-        float x = -width / 2;
-        float y = PortfolioChartUtils.getHeight(plInstrumentNamePaint, instrumentName) / 2;
-        RectF rectF = PortfolioChartUtils.getRectFAroundCircle(mArcRadius, mSelectedArcWidth);
-        if (width > rectF.width()) {
-            String s = instrumentName + plValue;
-            CharSequence charSequence = TextUtils.ellipsize(s, new TextPaint(plInstrumentNamePaint), rectF.width(), TextUtils.TruncateAt.END);
-            s = charSequence.toString();
-            int lastIndex = s.lastIndexOf(" ");
-            String pl = s.substring(lastIndex, s.length());
-            width = plInstrumentNamePaint.measureText(s);
-            canvas.drawText(instrumentName, -width / 2, y, plInstrumentNamePaint);
-            canvas.drawText(pl, x + instrumentTextWidth, y, plValuePaint);
-        } else {
-            canvas.drawText(instrumentName, x, y, plInstrumentNamePaint);
-            canvas.drawText(plValue, x + instrumentTextWidth, y, plValuePaint);
-        }
-        //foo(canvas, instrumentName, plValue);
+//        Paint plInstrumentNamePaint = mPaintFactory.getPLInstrumentNamePaint();
+//        Paint plValuePaint = getPLValuePaint(plValue);
+//
+//
+//        float instrumentTextWidth = plInstrumentNamePaint.measureText(instrumentName);
+//        float valueTextWidth = plValuePaint.measureText(plValue);
+//        float width = instrumentTextWidth + valueTextWidth;
+//        float x = -width / 2;
+//        float y = PortfolioChartUtils.getHeight(plInstrumentNamePaint, instrumentName) / 2;
+//        RectF rectF = PortfolioChartUtils.getRectFAroundCircle(mArcRadius, mSelectedArcWidth);
+//        if (width > rectF.width()) {
+//            String s = instrumentName + plValue;
+//            CharSequence charSequence = TextUtils.ellipsize(s, new TextPaint(plInstrumentNamePaint), rectF.width(), TextUtils.TruncateAt.END);
+//            s = charSequence.toString();
+//            int lastIndex = s.lastIndexOf(" ");
+//            String pl = lastIndex != -1 ? s.substring(lastIndex, s.length()) : "";
+//            width = plInstrumentNamePaint.measureText(s);
+//            canvas.drawText(s, -width / 2, y, plInstrumentNamePaint);
+//            //canvas.drawText(pl, x + instrumentTextWidth, y, plValuePaint);
+//        } else {
+//            canvas.drawText(instrumentName, x, y, plInstrumentNamePaint);
+//            canvas.drawText(plValue, x + instrumentTextWidth, y, plValuePaint);
+//        }
+        foo(canvas, instrumentName, plValue);
     }
 
     private void foo(Canvas canvas, String instrumentName, String plValue) {
@@ -219,13 +220,14 @@ public class ProfileChartView extends View implements ProfileChart {
 
     private void drawClipPL(Canvas canvas, String instrumentName, String plValue, float avail, float yShift, float totalWidth) {
         String plText = instrumentName + plValue;
-        CharSequence ellipsized = TextUtils.ellipsize(plText, mPaintFactory.getPLInstrumentNameTextPaint(), avail, TextUtils.TruncateAt.END);
+        Toast.makeText(getContext(), avail+", "+getPLTextWidth(instrumentName, plValue), Toast.LENGTH_SHORT).show();
+        CharSequence ellipsized = TextUtils.ellipsize(plText, new TextPaint(mPaintFactory.getPLInstrumentNamePaint()), avail, TextUtils.TruncateAt.END);
         String ellipsizedPLText = ellipsized.toString();
         int index = ellipsizedPLText.lastIndexOf(" ");
-        plValue = ellipsizedPLText.substring(index, ellipsizedPLText.length());
-        float instrNameWidth = mPaintFactory.getPLInstrumentNamePaint().measureText(instrumentName);
-        canvas.drawText(instrumentName, -totalWidth / 2, yShift, mPaintFactory.getPLInstrumentNamePaint());
-        canvas.drawText(plValue, -totalWidth / 2 + instrNameWidth, yShift, getPLValuePaint(plValue));
+        plValue = index != -1 ? ellipsizedPLText.substring(index, ellipsizedPLText.length()) : "";
+        float instrNameWidth = mPaintFactory.getPLInstrumentNamePaint().measureText(ellipsizedPLText);
+        canvas.drawText(ellipsizedPLText, -instrNameWidth / 2, yShift, mPaintFactory.getPLInstrumentNamePaint());
+        //canvas.drawText(plValue, -totalWidth / 2 + instrNameWidth, yShift, getPLValuePaint(plValue));
     }
 
     private String getPLInstrumentName(String instrumentName) {

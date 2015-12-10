@@ -136,7 +136,7 @@ public class PortfolioChartUtils {
         list.add(new PortfolioBreakdownImpl("ADIDAS", "0.156339", "0.232918"));
         list.add(new PortfolioBreakdownImpl("AUDJPY", "0.200099", "-0.000253"));
         list.add(new PortfolioBreakdownImpl("USDJPY", "0.150099", "0.000253"));
-        list.add(new PortfolioBreakdownImpl("USDJPYBLABD", "0.300099", "-0.000253"));
+        list.add(new PortfolioBreakdownImpl("USDJPYBLABRR", "0.300099", "-0.000253"));
 //        list.add(new PortfolioBreakdownImpl("USDJPY", "0.180099", "0.000253"));
         return list;
     }
