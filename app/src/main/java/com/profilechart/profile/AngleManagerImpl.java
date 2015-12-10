@@ -32,12 +32,20 @@ public class AngleManagerImpl implements AngleManager {
 
     @Override
     public float getAbsoluteStartAngle(int index) {
-        return Math.abs(getStartAngle(index));
+        if (mPieDirection == PieDirection.COUNTERCLOCKWISE) {
+            return Math.abs(getStartAngle(index));
+        } else {
+            return 360 - Math.abs(getEndAngle(index));
+        }
     }
 
     @Override
     public float getAbsoluteEndAngle(int index) {
-        return Math.abs(getEndAngle(index));
+        if (mPieDirection == PieDirection.COUNTERCLOCKWISE) {
+            return Math.abs(getEndAngle(index));
+        } else {
+            return 360 - Math.abs(getStartAngle(index));
+        }
     }
 
     @Override
@@ -52,7 +60,11 @@ public class AngleManagerImpl implements AngleManager {
 
     @Override
     public float getTotalSweepAngle() {
-        return mAngles[mAngles.length - 1] - 360;
+        if (mPieDirection == PieDirection.COUNTERCLOCKWISE) {
+            return mAngles[mAngles.length - 1] - 360;
+        } else {
+            return 360 - mAngles[mAngles.length - 1];
+        }
     }
 
     @Override
