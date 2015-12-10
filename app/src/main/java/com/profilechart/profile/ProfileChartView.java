@@ -7,19 +7,18 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.AttributeSet;
-import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Toast;
 
 import com.profilechart.R;
 
 import java.util.List;
 
-public class ProfileChartView extends View implements ProfileChart, View.OnTouchListener {
+public class ProfileChartView extends View implements ProfileChart {
 
     private PaintFactory mPaintFactory;
     private AngleManager mAngleManager;
     private PortfolioDebug mDebug;
+    private PieTouchListener mPieTouchListener;
     private int mSelectedSectorIndex = -1;
 
     private List<PortfolioBreakdown> mBreakdownList;
@@ -67,18 +66,23 @@ public class ProfileChartView extends View implements ProfileChart, View.OnTouch
             initWidgetParams(context, mScale);
             initPaintFactory(mArcWidth, mSelectedArcWidth);
             initDebug();
+            applyTouchListener();
         } finally {
             if (array != null) {
                 array.recycle();
             }
         }
-        setOnTouchListener(this);
         //TODO delete
         setBackgroundColor(Color.GRAY);
     }
 
     private void initDebug() {
         mDebug = new PortfolioDebugImpl(mWidth, mHeight, mArcRadius, mCircleMargin, mScale, mPercentageBottomMargin);
+    }
+
+    private void applyTouchListener() {
+        mPieTouchListener = new PieTouchListener(mWidth, mHeight);
+        setOnTouchListener(mPieTouchListener);
     }
 
     private void initWidgetParams(Context context, float scale) {
@@ -168,35 +172,17 @@ public class ProfileChartView extends View implements ProfileChart, View.OnTouch
         if (breakdownList != null) {
             mBreakdownList = breakdownList;
             mAngleManager = new AngleManagerImpl(PieDirection.COUNTERCLOCKWISE, breakdownList);
+            if (mPieTouchListener != null) {
+                mPieTouchListener.setBreakdownList(mBreakdownList);
+                mPieTouchListener.setAngleManager(mAngleManager);
+            }
             invalidate();
         }
     }
 
     @Override
-    public boolean onTouch(View v, MotionEvent event) {
-        if (mBreakdownList != null && mBreakdownList.size() > 0 && mAngleManager != null) {
-            float x = event.getX() - mWidth / 2;
-            float y = event.getY() - mHeight / 2;
-            float radius = (float) Math.sqrt(x * x + y * y);
-            float angle;
-            angle = (float) (Math.acos(x / radius) * 180 / Math.PI);
-            if (y > 0) {
-                angle = 360 - angle;
-            }
-            angle = mAngleManager.getDirection() == PieDirection.COUNTERCLOCKWISE ? -angle : angle;
-            int i = 0;
-            for (PortfolioBreakdown breakdown : mBreakdownList) {
-                if (breakdown.isDrawable()) {
-                    if (Math.abs(angle) >= mAngleManager.getAbsoluteStartAngle(i) && Math.abs(angle) <= mAngleManager.getAbsoluteEndAngle(i)) {
-                        break;
-                    }
-                    i++;
-                }
-            }
-            mSelectedSectorIndex = i;
-            invalidate();
-        }
-
-        return false;
+    public void selectSector(final int index) {
+        mSelectedSectorIndex = index;
+        invalidate();
     }
 }

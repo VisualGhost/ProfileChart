@@ -6,4 +6,6 @@ public interface ProfileChart {
 
     void draw(List<PortfolioBreakdown> breakdownList);
 
+    void selectSector(int index);
+
 }
