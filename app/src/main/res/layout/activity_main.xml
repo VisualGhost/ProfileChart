@@ -16,6 +16,7 @@
         android:layout_width="@dimen/profile_chart_width"
         android:layout_height="@dimen/profile_chart_height"
         android:layout_centerInParent="true"
+        android:background="#878787"
         app:circleMargin="@dimen/profile_chart_circle_margin"
         app:instrumentNameTextSize="@dimen/profile_chart_instrument_name_text_size"
         app:pLInstrumentNameTextSize="@dimen/profile_chart_pl_instrument_text_size"

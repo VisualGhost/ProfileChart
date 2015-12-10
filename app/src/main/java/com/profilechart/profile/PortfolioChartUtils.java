@@ -122,13 +122,21 @@ public class PortfolioChartUtils {
         return rect.height();
     }
 
+    public static RectF getRectFAroundCircle(float arcRadius, float padding) {
+        float left = -arcRadius + padding;
+        float top = -arcRadius + padding;
+        float right = arcRadius - padding;
+        float bottom = arcRadius - padding;
+        return new RectF(left, top, right, bottom);
+    }
+
     // TODO parse cursor
     public static List<PortfolioBreakdown> getBreakdownList(Cursor cursor) {
         List<PortfolioBreakdown> list = new ArrayList<>();
         list.add(new PortfolioBreakdownImpl("ADIDAS", "0.156339", "0.232918"));
         list.add(new PortfolioBreakdownImpl("AUDJPY", "0.200099", "-0.000253"));
         list.add(new PortfolioBreakdownImpl("USDJPY", "0.150099", "0.000253"));
-        list.add(new PortfolioBreakdownImpl("USDJPYBLAB", "0.300099", "-0.000253"));
+        list.add(new PortfolioBreakdownImpl("USDJPYBLABD", "0.300099", "-0.000253"));
 //        list.add(new PortfolioBreakdownImpl("USDJPY", "0.180099", "0.000253"));
         return list;
     }

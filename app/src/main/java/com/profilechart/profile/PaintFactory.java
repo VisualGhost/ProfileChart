@@ -1,6 +1,7 @@
 package com.profilechart.profile;
 
 import android.graphics.Paint;
+import android.text.TextPaint;
 
 public interface PaintFactory {
 
@@ -17,5 +18,7 @@ public interface PaintFactory {
     Paint getPercentagePaint(); // 18.13%
 
     Paint getInstrumentNamePaint(); // USDILS
+
+    TextPaint getPLInstrumentNameTextPaint();
 
 }

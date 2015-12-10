@@ -2,6 +2,7 @@ package com.profilechart.profile;
 
 import android.content.Context;
 import android.graphics.Paint;
+import android.text.TextPaint;
 
 public class PaintFactoryImpl implements PaintFactory {
 
@@ -11,6 +12,7 @@ public class PaintFactoryImpl implements PaintFactory {
     private final Paint mInstrumentNamePaint;
     private final Paint mPLInstrumentNamePaint;
     private final Paint mPLValuePaint;
+    private final TextPaint mPLInstrumentNameTextPaint;
 
     private ColorFactory mColorFactory;
     private int mPLValueIncTextColor;
@@ -25,6 +27,7 @@ public class PaintFactoryImpl implements PaintFactory {
         mPLValuePaint = new Paint();
         mPercentagePaint = new Paint();
         mInstrumentNamePaint = new Paint();
+        mPLInstrumentNameTextPaint = new TextPaint(mPLInstrumentNamePaint);
 
         configArcPaint(mArcPaint, builder.mArcWidth);
         configArcPaint(mSelectedArcPaint, builder.mSelectedArcWidth);
@@ -100,6 +103,11 @@ public class PaintFactoryImpl implements PaintFactory {
     @Override
     public Paint getInstrumentNamePaint() {
         return mInstrumentNamePaint;
+    }
+
+    @Override
+    public TextPaint getPLInstrumentNameTextPaint() {
+        return mPLInstrumentNameTextPaint;
     }
 
     public static class Builder {

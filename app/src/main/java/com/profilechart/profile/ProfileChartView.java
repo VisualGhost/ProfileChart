@@ -21,29 +21,23 @@ public class ProfileChartView extends View implements ProfileChart {
     private AngleManager mAngleManager;
     private PortfolioDebug mDebug;
     private PieTouchListener mPieTouchListener;
-    private int mSelectedSectorIndex = -1;
-
     private List<PortfolioBreakdown> mBreakdownList;
-
     private RectF mRectF;
+    private boolean mIsDebugMode;
     private float mWidth;
     private float mHeight;
-
     private float mScale;
-
-    private float mArcWidth;
     private float mSelectedArcWidth;
-
     private float mArcRadius;
-    private boolean mIsDebugMode;
     private float mCircleMargin;
     private float mPercentageBottomMargin;
     private float mPLInstrumentNameTextSize;
+    private float mPercentageTextSize;
+    private float mInstrumentNameTextSize;
     private int mPLTextColor;
     private int mPLIncValueTextColor;
     private int mPLDecValueTextColor;
-    private float mPercentageTextSize;
-    private float mInstrumentNameTextSize;
+    private int mSelectedSectorIndex = -1;
     private String mPlString;
 
     public ProfileChartView(final Context context) {
@@ -66,7 +60,7 @@ public class ProfileChartView extends View implements ProfileChart {
         try {
             array = context.obtainStyledAttributes(attrs, R.styleable.ProfileChart);
             mScale = array.getFloat(R.styleable.ProfileChart_profileChartScale, 1f);
-            mArcWidth = mScale * array.getDimension(R.styleable.ProfileChart_strokeWidth, 0f);
+            float arcWidth = mScale * array.getDimension(R.styleable.ProfileChart_strokeWidth, 0f);
             mSelectedArcWidth = mScale * array.getDimension(R.styleable.ProfileChart_strokeWidthSelected, 0f);
             mArcRadius = mScale * array.getDimension(R.styleable.ProfileChart_strokeRadius, 0f);
             mIsDebugMode = array.getBoolean(R.styleable.ProfileChart_profileChartDebugMode, false);
@@ -80,7 +74,7 @@ public class ProfileChartView extends View implements ProfileChart {
             mInstrumentNameTextSize = mScale * array.getDimension(R.styleable.ProfileChart_instrumentNameTextSize, 0f);
             mPlString = context.getString(R.string.pl);
             initWidgetParams(context, mScale);
-            initPaintFactory(mArcWidth, mSelectedArcWidth);
+            initPaintFactory(arcWidth, mSelectedArcWidth);
             initDebug();
             applyTouchListener();
         } finally {
@@ -88,8 +82,6 @@ public class ProfileChartView extends View implements ProfileChart {
                 array.recycle();
             }
         }
-        //TODO delete
-        setBackgroundColor(Color.GRAY);
     }
 
     private void initDebug() {
@@ -163,7 +155,7 @@ public class ProfileChartView extends View implements ProfileChart {
                             portfolioBreakdown.getInstrumentName(),
                             portfolioBreakdown.getAllocationPercentage());
                     if (index == mSelectedSectorIndex) {
-                        drawPLText(canvas, portfolioBreakdown.getInstrumentName(), portfolioBreakdown.getPLPercentage());
+                        drawPLText(canvas, getPLInstrumentName(portfolioBreakdown.getInstrumentName()), portfolioBreakdown.getPLPercentage());
                     }
                     index++;
                 }
@@ -188,22 +180,16 @@ public class ProfileChartView extends View implements ProfileChart {
     }
 
     private void drawPLText(Canvas canvas, String instrumentName, String plValue) {
-        instrumentName = instrumentName + " " + mPlString + " ";
         Paint plInstrumentNamePaint = mPaintFactory.getPLInstrumentNamePaint();
-        boolean isRed = false;
-        try {
-            float f = Float.valueOf(plValue);
-            isRed = Float.compare(f, 0) < 0;
-        } catch (NumberFormatException e) {
-            // TODO write log
-        }
-        Paint plValuePaint = isRed ? mPaintFactory.getDecPLValuePaint() : mPaintFactory.getIncPLValuePaint();
+        Paint plValuePaint = getPLValuePaint(plValue);
+
+
         float instrumentTextWidth = plInstrumentNamePaint.measureText(instrumentName);
         float valueTextWidth = plValuePaint.measureText(plValue);
         float width = instrumentTextWidth + valueTextWidth;
         float x = -width / 2;
         float y = PortfolioChartUtils.getHeight(plInstrumentNamePaint, instrumentName) / 2;
-        RectF rectF = getPLTextAllowRectF();
+        RectF rectF = PortfolioChartUtils.getRectFAroundCircle(mArcRadius, mSelectedArcWidth);
         if (width > rectF.width()) {
             String s = instrumentName + plValue;
             CharSequence charSequence = TextUtils.ellipsize(s, new TextPaint(plInstrumentNamePaint), rectF.width(), TextUtils.TruncateAt.END);
@@ -217,14 +203,49 @@ public class ProfileChartView extends View implements ProfileChart {
             canvas.drawText(instrumentName, x, y, plInstrumentNamePaint);
             canvas.drawText(plValue, x + instrumentTextWidth, y, plValuePaint);
         }
+        //foo(canvas, instrumentName, plValue);
     }
 
-    private RectF getPLTextAllowRectF() {
-        float left = -mArcRadius + mSelectedArcWidth;
-        float top = -mArcRadius + mSelectedArcWidth;
-        float right = mArcRadius - mSelectedArcWidth;
-        float bottom = mArcRadius - mSelectedArcWidth;
-        return new RectF(left, top, right, bottom);
+    private void foo(Canvas canvas, String instrumentName, String plValue) {
+        float width = getPLTextWidth(instrumentName, plValue);
+        RectF allowRectF = PortfolioChartUtils.getRectFAroundCircle(mArcRadius, mSelectedArcWidth);
+        if (width > allowRectF.width()) {
+            float yShift = PortfolioChartUtils.getHeight(mPaintFactory.getPLInstrumentNamePaint(), instrumentName) / 2;
+            drawClipPL(canvas, instrumentName, plValue, allowRectF.width(), yShift, width);
+        } else {
+            // TODO
+        }
+    }
+
+    private void drawClipPL(Canvas canvas, String instrumentName, String plValue, float avail, float yShift, float totalWidth) {
+        String plText = instrumentName + plValue;
+        CharSequence ellipsized = TextUtils.ellipsize(plText, mPaintFactory.getPLInstrumentNameTextPaint(), avail, TextUtils.TruncateAt.END);
+        String ellipsizedPLText = ellipsized.toString();
+        int index = ellipsizedPLText.lastIndexOf(" ");
+        plValue = ellipsizedPLText.substring(index, ellipsizedPLText.length());
+        float instrNameWidth = mPaintFactory.getPLInstrumentNamePaint().measureText(instrumentName);
+        canvas.drawText(instrumentName, -totalWidth / 2, yShift, mPaintFactory.getPLInstrumentNamePaint());
+        canvas.drawText(plValue, -totalWidth / 2 + instrNameWidth, yShift, getPLValuePaint(plValue));
+    }
+
+    private String getPLInstrumentName(String instrumentName) {
+        return instrumentName + " " + mPlString + " ";
+    }
+
+    private float getPLTextWidth(String instrumentName, String plValue) {
+        return mPaintFactory.getPLInstrumentNamePaint().measureText(instrumentName) +
+                getPLValuePaint(plValue).measureText(plValue);
+    }
+
+    private Paint getPLValuePaint(String plValue) {
+        boolean isDecValue;
+        try {
+            float f = Float.valueOf(plValue);
+            isDecValue = Float.compare(f, 0) < 0;
+        } catch (NumberFormatException e) {
+            isDecValue = false;
+        }
+        return isDecValue ? mPaintFactory.getDecPLValuePaint() : mPaintFactory.getIncPLValuePaint();
     }
 
     private void drawOthers(Canvas canvas, int index, String instrumentName) {

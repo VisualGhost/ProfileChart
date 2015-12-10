@@ -97,11 +97,7 @@ public class PortfolioDebugImpl implements PortfolioDebug {
 
     @Override
     public void drawBoxInsideCircle(final Canvas canvas) {
-        float left = 0 - mArcRadius + mSelectedArcWidth;
-        float top = 0 - mArcRadius + mSelectedArcWidth;
-        float right = 0 + mArcRadius - mSelectedArcWidth;
-        float bottom = 0 + mArcRadius - mSelectedArcWidth;
-        RectF rectF = new RectF(left, top, right, bottom);
+        RectF rectF = PortfolioChartUtils.getRectFAroundCircle(mArcRadius, mSelectedArcWidth);
         canvas.drawRect(rectF, mDebugPaint);
     }
 }
