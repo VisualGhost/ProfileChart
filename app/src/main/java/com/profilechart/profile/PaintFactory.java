@@ -9,7 +9,7 @@ public interface PaintFactory {
 
     Paint getSelectedPaint(int colorIndex);
 
-    Paint getPLInstrumentNamePaint(); // USDILS P/L
+    Paint getPLPaint(); // USDILS P/L
 
     Paint getIncPLValuePaint(); // 3.57
 
@@ -19,6 +19,6 @@ public interface PaintFactory {
 
     Paint getInstrumentNamePaint(); // USDILS
 
-    TextPaint getPLInstrumentNameTextPaint();
+    TextPaint getPLTextPaint();
 
 }

@@ -122,6 +122,10 @@ public class PortfolioChartUtils {
         return rect.height();
     }
 
+    public static float getWidth(Paint paint, String text) {
+        return paint.measureText(text);
+    }
+
     public static RectF getRectFAroundCircle(float arcRadius, float padding) {
         float left = -arcRadius + padding;
         float top = -arcRadius + padding;

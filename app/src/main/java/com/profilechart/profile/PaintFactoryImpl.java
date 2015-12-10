@@ -76,7 +76,7 @@ public class PaintFactoryImpl implements PaintFactory {
         return mSelectedArcPaint;
     }
 
-    public Paint getPLInstrumentNamePaint() {
+    public Paint getPLPaint() {
         return mPLInstrumentNamePaint;
     }
 
@@ -103,7 +103,7 @@ public class PaintFactoryImpl implements PaintFactory {
     }
 
     @Override
-    public TextPaint getPLInstrumentNameTextPaint() {
+    public TextPaint getPLTextPaint() {
         return mPLInstrumentNameTextPaint;
     }
 
