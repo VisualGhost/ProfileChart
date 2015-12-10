@@ -13,6 +13,7 @@ public class PortfolioDebugImpl implements PortfolioDebug {
     private float mArcRadius;
     private float mCircleMargin;
     private float mPercentageBottomMargin;
+    private float mSelectedArcWidth;
 
     public PortfolioDebugImpl(
             final float width,
@@ -20,12 +21,14 @@ public class PortfolioDebugImpl implements PortfolioDebug {
             final float arcRadius,
             final float circleMargin,
             final float scale,
-            final float percentageBottomMargin) {
+            final float percentageBottomMargin,
+            final float selectedArcWidth) {
         mWidth = width;
         mHeight = height;
         mArcRadius = arcRadius;
         mCircleMargin = circleMargin;
         mPercentageBottomMargin = percentageBottomMargin;
+        mSelectedArcWidth = selectedArcWidth;
         initDebugPaint(scale);
     }
 
@@ -68,6 +71,7 @@ public class PortfolioDebugImpl implements PortfolioDebug {
     @Override
     public void drawTextBox(final Canvas canvas, final float startAngle, final float sweetAngle,
                             final String instrumentName, final String percentage) {
+        // TODO not a clean code
         float radius = mArcRadius + mCircleMargin;
         RectF rectF = PortfolioChartUtils.getRectF(mDebugPaint, startAngle, sweetAngle, radius, instrumentName);
         canvas.drawRect(rectF, mDebugPaint);
@@ -89,5 +93,15 @@ public class PortfolioDebugImpl implements PortfolioDebug {
         float endX = PortfolioChartUtils.getX(startAngle, radius);
         float endY = PortfolioChartUtils.getY(startAngle, radius);
         canvas.drawLine(startX, startY, endX, endY, mDebugPaint);
+    }
+
+    @Override
+    public void drawBoxInsideCircle(final Canvas canvas) {
+        float left = 0 - mArcRadius + mSelectedArcWidth;
+        float top = 0 - mArcRadius + mSelectedArcWidth;
+        float right = 0 + mArcRadius - mSelectedArcWidth;
+        float bottom = 0 + mArcRadius - mSelectedArcWidth;
+        RectF rectF = new RectF(left, top, right, bottom);
+        canvas.drawRect(rectF, mDebugPaint);
     }
 }

@@ -8,5 +8,11 @@
         <attr name="profileChartDebugMode" format="boolean"/>
         <attr name="circleMargin" format="dimension"/>
         <attr name="percentageBottomMargin" format="dimension"/>
+        <attr name="percentageTextSize" format="dimension"/>
+        <attr name="instrumentNameTextSize" format="dimension"/>
+        <attr name="pLInstrumentNameTextSize" format="dimension"/>
+        <attr name="pLTextColor" format="color"/>
+        <attr name="pLValueIncTextColor" format="color"/>
+        <attr name="pLValueDecTextColor" format="color"/>
     </declare-styleable>
-</resources>
+/</resources>

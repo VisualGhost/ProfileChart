@@ -3,4 +3,8 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+
+    <color name="profile_chart_pl_instrument_name_color">#ffffff</color>
+    <color name="profile_chart_pl_value_inc_color">#73fd28</color>
+    <color name="profile_chart_pl_value_dec_color">#e60f0f</color>
 </resources>

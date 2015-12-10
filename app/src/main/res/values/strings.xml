@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">ProfileChart</string>
+    <string name="pl">P/L</string>
 </resources>

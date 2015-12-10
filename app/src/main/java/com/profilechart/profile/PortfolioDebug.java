@@ -16,4 +16,6 @@ public interface PortfolioDebug {
 
     void drawSector(Canvas canvas, float startAngle, float sweetAngle);
 
+    void drawBoxInsideCircle(Canvas canvas);
+
 }

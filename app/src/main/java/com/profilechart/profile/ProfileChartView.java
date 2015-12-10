@@ -6,6 +6,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.text.TextPaint;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -36,6 +38,13 @@ public class ProfileChartView extends View implements ProfileChart {
     private boolean mIsDebugMode;
     private float mCircleMargin;
     private float mPercentageBottomMargin;
+    private float mPLInstrumentNameTextSize;
+    private int mPLTextColor;
+    private int mPLIncValueTextColor;
+    private int mPLDecValueTextColor;
+    private float mPercentageTextSize;
+    private float mInstrumentNameTextSize;
+    private String mPlString;
 
     public ProfileChartView(final Context context) {
         super(context);
@@ -63,6 +72,13 @@ public class ProfileChartView extends View implements ProfileChart {
             mIsDebugMode = array.getBoolean(R.styleable.ProfileChart_profileChartDebugMode, false);
             mCircleMargin = mScale * array.getDimension(R.styleable.ProfileChart_circleMargin, 0f);
             mPercentageBottomMargin = mScale * array.getDimension(R.styleable.ProfileChart_percentageBottomMargin, 0f);
+            mPLInstrumentNameTextSize = mScale * array.getDimension(R.styleable.ProfileChart_pLInstrumentNameTextSize, 0f);
+            mPLTextColor = array.getColor(R.styleable.ProfileChart_pLTextColor, Color.TRANSPARENT);
+            mPLIncValueTextColor = array.getColor(R.styleable.ProfileChart_pLValueIncTextColor, Color.TRANSPARENT);
+            mPLDecValueTextColor = array.getColor(R.styleable.ProfileChart_pLValueDecTextColor, Color.TRANSPARENT);
+            mPercentageTextSize = mScale * array.getDimension(R.styleable.ProfileChart_percentageTextSize, 0f);
+            mInstrumentNameTextSize = mScale * array.getDimension(R.styleable.ProfileChart_instrumentNameTextSize, 0f);
+            mPlString = context.getString(R.string.pl);
             initWidgetParams(context, mScale);
             initPaintFactory(mArcWidth, mSelectedArcWidth);
             initDebug();
@@ -77,7 +93,7 @@ public class ProfileChartView extends View implements ProfileChart {
     }
 
     private void initDebug() {
-        mDebug = new PortfolioDebugImpl(mWidth, mHeight, mArcRadius, mCircleMargin, mScale, mPercentageBottomMargin);
+        mDebug = new PortfolioDebugImpl(mWidth, mHeight, mArcRadius, mCircleMargin, mScale, mPercentageBottomMargin, mSelectedArcWidth);
     }
 
     private void applyTouchListener() {
@@ -98,7 +114,16 @@ public class ProfileChartView extends View implements ProfileChart {
     }
 
     private void initPaintFactory(float strokeWidth, float selectedStrokeWidth) {
-        mPaintFactory = new PaintFactoryImpl(getContext(), strokeWidth, selectedStrokeWidth);
+        mPaintFactory = new PaintFactoryImpl.Builder()
+                .setArcWidth(strokeWidth)
+                .setSelectedArcWidth(selectedStrokeWidth)
+                .setPLInstrumentNameTextSize(mPLInstrumentNameTextSize)
+                .setPLTextColor(mPLTextColor)
+                .setPLValueIncTextColor(mPLIncValueTextColor)
+                .setPLValueDecTextColor(mPLDecValueTextColor)
+                .setPercentageTextSize(mPercentageTextSize)
+                .setInstrumentNameTextSize(mInstrumentNameTextSize)
+                .build(getContext());
     }
 
     @Override
@@ -123,16 +148,24 @@ public class ProfileChartView extends View implements ProfileChart {
      */
     private void drawDebugElements(Canvas canvas) {
         mDebug.drawCircleAroundPie(canvas);
+        mDebug.drawBoxInsideCircle(canvas);
+        mDebug.drawXAxis(canvas);
+        mDebug.drawYAxis(canvas);
     }
 
+    //TODO wrong name of method
     private void drawStrokes(Canvas canvas) {
         if (mBreakdownList != null && mBreakdownList.size() > 0 && mAngleManager != null) {
             int index = 0;
             for (PortfolioBreakdown portfolioBreakdown : mBreakdownList) {
                 if (portfolioBreakdown != null && portfolioBreakdown.isDrawable()) {
-                    drawStroke(canvas, index++,
+                    drawStroke(canvas, index,
                             portfolioBreakdown.getInstrumentName(),
                             portfolioBreakdown.getAllocationPercentage());
+                    if (index == mSelectedSectorIndex) {
+                        drawPLText(canvas, portfolioBreakdown.getInstrumentName(), portfolioBreakdown.getPLPercentage());
+                    }
+                    index++;
                 }
             }
             // todo Others
@@ -146,20 +179,61 @@ public class ProfileChartView extends View implements ProfileChart {
         float startAngle = mAngleManager.getStartAngle(index);
         float sweepAngle = mAngleManager.getSweepAngle(index);
         canvas.drawArc(mRectF, startAngle, sweepAngle, false, paint);
-        if (mIsDebugMode) {
+        // TODO false
+        if (false && mIsDebugMode) {
             mDebug.drawLine(canvas, startAngle, sweepAngle);
             mDebug.drawTextBox(canvas, startAngle, sweepAngle, instrumentName, percentage);
             mDebug.drawSector(canvas, startAngle, sweepAngle);
         }
     }
 
+    private void drawPLText(Canvas canvas, String instrumentName, String plValue) {
+        instrumentName = instrumentName + " " + mPlString + " ";
+        Paint plInstrumentNamePaint = mPaintFactory.getPLInstrumentNamePaint();
+        boolean isRed = false;
+        try {
+            float f = Float.valueOf(plValue);
+            isRed = Float.compare(f, 0) < 0;
+        } catch (NumberFormatException e) {
+            // TODO write log
+        }
+        Paint plValuePaint = isRed ? mPaintFactory.getDecPLValuePaint() : mPaintFactory.getIncPLValuePaint();
+        float instrumentTextWidth = plInstrumentNamePaint.measureText(instrumentName);
+        float valueTextWidth = plValuePaint.measureText(plValue);
+        float width = instrumentTextWidth + valueTextWidth;
+        float x = -width / 2;
+        float y = PortfolioChartUtils.getHeight(plInstrumentNamePaint, instrumentName) / 2;
+        RectF rectF = getPLTextAllowRectF();
+        if (width > rectF.width()) {
+            String s = instrumentName + plValue;
+            CharSequence charSequence = TextUtils.ellipsize(s, new TextPaint(plInstrumentNamePaint), rectF.width(), TextUtils.TruncateAt.END);
+            s = charSequence.toString();
+            int lastIndex = s.lastIndexOf(" ");
+            String pl = s.substring(lastIndex, s.length());
+            width = plInstrumentNamePaint.measureText(s);
+            canvas.drawText(instrumentName, -width / 2, y, plInstrumentNamePaint);
+            canvas.drawText(pl, x + instrumentTextWidth, y, plValuePaint);
+        } else {
+            canvas.drawText(instrumentName, x, y, plInstrumentNamePaint);
+            canvas.drawText(plValue, x + instrumentTextWidth, y, plValuePaint);
+        }
+    }
+
+    private RectF getPLTextAllowRectF() {
+        float left = -mArcRadius + mSelectedArcWidth;
+        float top = -mArcRadius + mSelectedArcWidth;
+        float right = mArcRadius - mSelectedArcWidth;
+        float bottom = mArcRadius - mSelectedArcWidth;
+        return new RectF(left, top, right, bottom);
+    }
 
     private void drawOthers(Canvas canvas, int index, String instrumentName) {
         Paint paint = index == mSelectedSectorIndex ? mPaintFactory.getSelectedPaint(index) : mPaintFactory.getPaint(index);
         float startAngle = mAngleManager.getStartAngle(index);
         float sweepAngle = mAngleManager.getTotalSweepAngle();
         canvas.drawArc(mRectF, startAngle, sweepAngle, false, paint);
-        if (mIsDebugMode) {
+        // TODO false
+        if (false && mIsDebugMode) {
             mDebug.drawLine(canvas, startAngle, sweepAngle);
             //TODO ?%
             mDebug.drawTextBox(canvas, startAngle, sweepAngle, instrumentName, "?%");
