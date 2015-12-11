@@ -38,6 +38,7 @@ public class ProfileChartView extends View implements ProfileChart {
     private int mPLDecValueTextColor;
     private int mSelectedSectorIndex = -1;
     private String mPlString;
+    private String mOthersString;
 
     public ProfileChartView(final Context context) {
         super(context);
@@ -72,6 +73,7 @@ public class ProfileChartView extends View implements ProfileChart {
             mPercentageTextSize = mScale * array.getDimension(R.styleable.ProfileChart_percentageTextSize, 0f);
             mInstrumentNameTextSize = mScale * array.getDimension(R.styleable.ProfileChart_instrumentNameTextSize, 0f);
             mPlString = context.getString(R.string.pl);
+            mOthersString = context.getString(R.string.others);
             initWidgetParams(context, mScale);
             initPaintFactory(arcWidth, mSelectedArcWidth);
             initDebug();
@@ -127,7 +129,7 @@ public class ProfileChartView extends View implements ProfileChart {
     protected void onDraw(final Canvas canvas) {
         super.onDraw(canvas);
         canvas.translate(mWidth / 2, mHeight / 2);
-        drawStrokes(canvas);
+        drawChartElements(canvas);
 
         if (mIsDebugMode) {
             drawDebugElements(canvas);
@@ -144,38 +146,51 @@ public class ProfileChartView extends View implements ProfileChart {
         mDebug.drawYAxis(canvas);
     }
 
-    //TODO wrong name of method
-    private void drawStrokes(Canvas canvas) {
+    private void drawChartElements(Canvas canvas) {
         if (mBreakdownList != null && mBreakdownList.size() > 0 && mAngleManager != null) {
             int index = 0;
-            for (PortfolioBreakdown portfolioBreakdown : mBreakdownList) {
-                if (portfolioBreakdown != null && portfolioBreakdown.isDrawable()) {
-                    drawStroke(canvas, index,
-                            portfolioBreakdown.getInstrumentName(),
-                            portfolioBreakdown.getAllocationPercentage());
-                    if (index == mSelectedSectorIndex) {
-                        drawPLTextInsideCircle(canvas, getPLInstrumentName(portfolioBreakdown.getInstrumentName()), portfolioBreakdown.getPLPercentage());
-                    }
+            for (PortfolioBreakdown breakdown : mBreakdownList) {
+                if (breakdown != null && breakdown.isDrawable()) {
+                    drawInstrumentSector(canvas, index, breakdown);
                     index++;
                 }
             }
-            // todo Others
-            drawOthers(canvas, index, "Others");
+            drawOthers(canvas, index);
         }
     }
 
-    private void drawStroke(Canvas canvas, int index, String instrumentName, String percentage) {
-        //TODO remove if clause
-        Paint paint = index == mSelectedSectorIndex ? mPaintFactory.getSelectedPaint(index) : mPaintFactory.getPaint(index);
-        float startAngle = mAngleManager.getStartAngle(index);
-        float sweepAngle = mAngleManager.getSweepAngle(index);
-        canvas.drawArc(mRectF, startAngle, sweepAngle, false, paint);
-        // TODO false
-        if (false && mIsDebugMode) {
-            mDebug.drawLine(canvas, startAngle, sweepAngle);
-            mDebug.drawTextBox(canvas, startAngle, sweepAngle, instrumentName, percentage);
-            mDebug.drawSector(canvas, startAngle, sweepAngle);
+    private void drawInstrumentSector(Canvas canvas, int index, PortfolioBreakdown breakdown) {
+        drawStroke(canvas, index, mAngleManager.getStartAngle(index), mAngleManager.getSweepAngle(index));
+        if (index == mSelectedSectorIndex) {
+            drawPLTextInsideCircle(canvas, getPLInstrumentName(breakdown.getInstrumentName()), breakdown.getPLPercentage());
         }
+        if (mIsDebugMode) {
+            drawDebugElements(canvas, breakdown.getInstrumentName(), breakdown.getAllocationPercentage(), mAngleManager.getStartAngle(index), mAngleManager.getSweepAngle(index));
+        }
+    }
+
+    private void drawStroke(Canvas canvas, int index, float startAngle, float sweepAngle) {
+        Paint paint;
+        if (index == mSelectedSectorIndex) {
+            paint = mPaintFactory.getSelectedPaint(index);
+        } else {
+            paint = mPaintFactory.getPaint(index);
+        }
+        canvas.drawArc(mRectF, startAngle, sweepAngle, false, paint);
+    }
+
+    private void drawOthers(Canvas canvas, int index) {
+        drawStroke(canvas, index, mAngleManager.getStartAngle(index), mAngleManager.getTotalSweepAngle());
+        if (mIsDebugMode) {
+            float sweepAngle = mAngleManager.getTotalSweepAngle();
+            drawDebugElements(canvas, mOthersString, PortfolioChartUtils.angleToPercentage(Math.abs(sweepAngle)), mAngleManager.getStartAngle(index), sweepAngle);
+        }
+    }
+
+    private void drawDebugElements(Canvas canvas, String instrumentName, String percentage, float startAngle, float sweepAngle) {
+        mDebug.drawLine(canvas, startAngle, sweepAngle);
+        mDebug.drawTextBox(canvas, startAngle, sweepAngle, instrumentName, percentage);
+        mDebug.drawSector(canvas, startAngle, sweepAngle);
     }
 
     private void drawPLTextInsideCircle(Canvas canvas, String instrumentName, String plValue) {
@@ -249,20 +264,6 @@ public class ProfileChartView extends View implements ProfileChart {
             isDecValue = false;
         }
         return isDecValue ? mPaintFactory.getDecPLValuePaint() : mPaintFactory.getIncPLValuePaint();
-    }
-
-    private void drawOthers(Canvas canvas, int index, String instrumentName) {
-        Paint paint = index == mSelectedSectorIndex ? mPaintFactory.getSelectedPaint(index) : mPaintFactory.getPaint(index);
-        float startAngle = mAngleManager.getStartAngle(index);
-        float sweepAngle = mAngleManager.getTotalSweepAngle();
-        canvas.drawArc(mRectF, startAngle, sweepAngle, false, paint);
-        // TODO false
-        if (false && mIsDebugMode) {
-            mDebug.drawLine(canvas, startAngle, sweepAngle);
-            //TODO ?%
-            mDebug.drawTextBox(canvas, startAngle, sweepAngle, instrumentName, "?%");
-            mDebug.drawSector(canvas, startAngle, sweepAngle);
-        }
     }
 
     @Override

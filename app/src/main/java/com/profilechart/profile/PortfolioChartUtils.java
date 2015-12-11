@@ -21,7 +21,7 @@ public class PortfolioChartUtils {
      * Converts '0.123456' to '12.35%'
      */
     public static String getReadablePercentage(String percentage) {
-        return roundUp(percentage, "%");
+        return roundUp(percentage, " %");
     }
 
     private static String roundUp(String s, String symbol) {
@@ -77,6 +77,19 @@ public class PortfolioChartUtils {
     }
 
     /**
+     * Converts e.g. 36o to 10.00%
+     */
+    public static String angleToPercentage(float angle) {
+        try {
+            return formatPercentage(angle / ANGLE_OF_ONE_PERCENTAGE)+" %";
+        } catch (NumberFormatException e) {
+            return "";
+        } catch (IllegalFormatException e) {
+            return "";
+        }
+    }
+
+    /**
      * @param angle The angle in degrees
      */
     public static float getX(float angle, float radius) {
@@ -106,7 +119,7 @@ public class PortfolioChartUtils {
 
     public static RectF getRectF(Paint paint, float startAngle, float sweetAngle, float radius, String text) {
         float width = paint.measureText(text, 0, text.length());
-        radius += width / Math.sqrt(2);
+        radius += 100;
         float x = PortfolioChartUtils.getCenterSectorX(startAngle, sweetAngle, radius);
         float y = PortfolioChartUtils.getCenterSectorY(startAngle, sweetAngle, radius);
         float left = x - width / 2;

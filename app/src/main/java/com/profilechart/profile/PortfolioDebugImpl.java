@@ -43,12 +43,12 @@ public class PortfolioDebugImpl implements PortfolioDebug {
 
     @Override
     public void drawXAxis(final Canvas canvas) {
-        canvas.drawLine(-mWidth / 2, 0, mWidth / 2, 0, mDebugPaint);
+        //canvas.drawLine(-mWidth / 2, 0, mWidth / 2, 0, mDebugPaint);
     }
 
     @Override
     public void drawYAxis(final Canvas canvas) {
-        canvas.drawLine(0, -mWidth / 2, 0, mWidth / 2, mDebugPaint);
+        //canvas.drawLine(0, -mWidth / 2, 0, mWidth / 2, mDebugPaint);
     }
 
     @Override
@@ -62,7 +62,7 @@ public class PortfolioDebugImpl implements PortfolioDebug {
     public void drawLine(final Canvas canvas, final float startAngle, final float sweetAngle) {
         float startX = 0;
         float startY = 0;
-        float radius = mArcRadius + mCircleMargin;
+        float radius = (float) Math.sqrt(mWidth * mWidth + mHeight * mHeight);
         float endX = PortfolioChartUtils.getCenterSectorX(startAngle, sweetAngle, radius);
         float endY = PortfolioChartUtils.getCenterSectorY(startAngle, sweetAngle, radius);
         canvas.drawLine(startX, startY, endX, endY, mDebugPaint);
@@ -74,8 +74,16 @@ public class PortfolioDebugImpl implements PortfolioDebug {
         // TODO not a clean code
         float radius = mArcRadius + mCircleMargin;
         RectF rectF = PortfolioChartUtils.getRectF(mDebugPaint, startAngle, sweetAngle, radius, instrumentName);
-        canvas.drawRect(rectF, mDebugPaint);
-        //canvas.drawCircle(rectF.centerX(), rectF.centerY(), rectF.width()/2, mDebugPaint);
+
+        float height = PortfolioChartUtils.getHeight(mDebugPaint, instrumentName) +
+                PortfolioChartUtils.getHeight(mDebugPaint, percentage) + mPercentageBottomMargin;
+
+        RectF rectF1 = new RectF(rectF);
+        float delta = rectF.height() - height;
+        rectF1.top = rectF1.top + delta / 2;
+        rectF1.bottom = rectF1.bottom - delta / 2;
+        canvas.drawRect(rectF1, mDebugPaint);
+        //canvas.drawCircle(rectF.centerX(), rectF.centerY(), rectF.width() / 2, mDebugPaint);
 
         float x = rectF.left;
         float y = rectF.centerY() - mPercentageBottomMargin;
@@ -92,12 +100,12 @@ public class PortfolioDebugImpl implements PortfolioDebug {
         float radius = (float) Math.sqrt(mWidth * mWidth + mHeight * mHeight);
         float endX = PortfolioChartUtils.getX(startAngle, radius);
         float endY = PortfolioChartUtils.getY(startAngle, radius);
-        canvas.drawLine(startX, startY, endX, endY, mDebugPaint);
+        //canvas.drawLine(startX, startY, endX, endY, mDebugPaint);
     }
 
     @Override
     public void drawBoxInsideCircle(final Canvas canvas) {
         RectF rectF = PortfolioChartUtils.getRectFAroundCircle(mArcRadius, mSelectedArcWidth);
-        canvas.drawRect(rectF, mDebugPaint);
+        //canvas.drawRect(rectF, mDebugPaint);
     }
 }
