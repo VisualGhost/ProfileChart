@@ -74,37 +74,81 @@ public class PortfolioDebugImpl implements PortfolioDebug {
                             final String instrumentName, final String percentage) {
         // TODO not a clean code
         float radius = mArcRadius + mCircleMargin;
-        RectF rectF = PortfolioChartUtils.getRectF(mDebugPaint, startAngle, sweetAngle, radius, instrumentName);
+        float textWidth = Math.max(PortfolioChartUtils.getWidth(mDebugPaint, instrumentName),
+                PortfolioChartUtils.getWidth(mDebugPaint, percentage));
+        float instrumentHeight = PortfolioChartUtils.getHeight(mDebugPaint, instrumentName);
+        float percentageHeight = PortfolioChartUtils.getHeight(mDebugPaint, percentage);
+        float textHeight = instrumentHeight + mPercentageBottomMargin + percentageHeight;
+        RectF textBox = PortfolioChartUtils.getTextBoxRectF(radius, startAngle, sweetAngle, textWidth, textHeight);
+        //canvas.drawRect(textBox, mDebugPaint);
 
-        float height = PortfolioChartUtils.getHeight(mDebugPaint, instrumentName) +
-                PortfolioChartUtils.getHeight(mDebugPaint, percentage) + mPercentageBottomMargin;
-
-        RectF rectF1 = new RectF(rectF);
-        float delta = rectF.height() - height;
-        rectF1.top = rectF1.top + delta / 2;
-        rectF1.bottom = rectF1.bottom - delta / 2;
-        canvas.drawRect(rectF1, mDebugPaint);
-        //canvas.drawCircle(rectF.centerX(), rectF.centerY(), rectF.width() / 2, mDebugPaint);
-
-        float x = rectF.left;
-        float y = rectF.centerY() - mPercentageBottomMargin;
-        canvas.drawText(percentage, x, y, mDebugPaint);
-
-        y = rectF.centerY() + PortfolioChartUtils.getHeight(mDebugPaint, instrumentName) + mPercentageBottomMargin;
-        canvas.drawText(instrumentName, x, y, mDebugPaint);
-        //------------------Find max length ----------------------------
-        float cX = rectF1.centerX();
-        float cY = rectF1.centerY();
+        float cX = textBox.centerX();
+        float cY = textBox.centerY();
         float radiusToCenterOfBox = (float) Math.sqrt(cX * cX + cY * cY);
         float angle = startAngle + sweetAngle / 2;
         float hypot;
-        if (Math.sin(angle * Math.PI / 180) != 0) {
-            hypot = (float) (Math.abs(rectF1.height() / 2 / Math.sin(angle * Math.PI / 180)));
+        if (Double.compare(Math.sin(angle * Math.PI / 180), 0) != 0) {
+            hypot = (float) (Math.abs(textBox.height() / 2 / Math.sin(angle * Math.PI / 180)));
         } else {
-            hypot = rectF1.height() / 2;
+            hypot = textBox.height() / 2;
         }
+        hypot = Math.min(hypot, textBox.height() / 2);
         float d = radiusToCenterOfBox - hypot;
-        Log.e("Test", instrumentName + ", " + percentage + ", " + (d - radius));
+
+        Log.e("Test2", " angle: " + angle + ", " + percentage + ", " + (2 * radius - d));
+
+        textBox = PortfolioChartUtils.getTextBoxRectF(2 * radius - d, startAngle, sweetAngle, textWidth, textHeight);
+        canvas.drawRect(textBox, mDebugPaint);
+        //Log.e("Test", instrumentName + ", " + percentage + ", " + (d - radius));
+        float x = textBox.left;
+        float y = textBox.top + percentageHeight;
+
+        float x1 = textBox.left;
+        float x2 = textBox.right;
+        float y1;
+        if (-angle >= 180 && -angle <= 360) {
+            y1 = textBox.top;
+        } else {
+            y1 = textBox.bottom;
+        }
+        float xPoint = (float) (Math.sqrt(radius * radius - y1 * y1));
+
+        float xShift;
+        if (-angle >= 90 && -angle <= 270) {
+            xPoint = -xPoint;
+            xShift = xPoint - textBox.right;
+        } else {
+            xShift = xPoint - textBox.left;
+        }
+
+        //TODO find yShift
+
+        float yShift;
+
+        if (-angle >= 0 && -angle <= 180) {
+            yShift = Math.abs(textBox.bottom);
+            float r = (float) (radius * Math.sin(angle * Math.PI / 180));
+            if (Float.compare(-r, yShift) == 0) {
+                //xShift = 0;
+            }
+            //Log.e("Test", ">>> " + instrumentName + ", " + percentage + ", " + yShift + ", r: " + r+", "+xShift);
+        }
+
+        if (xPoint >= textBox.left && xPoint <= textBox.right) {
+            Log.e("Test", "x: " + xPoint + ", " + x1 + ", " + x2 + ", " + instrumentName + ", " + percentage + ", " + xShift);
+        }
+
+        if (-angle > 85 && -angle < 105) {
+            xShift = 0;
+        }
+
+        if (-angle > 265 && -angle < 275) {
+            xShift = 0;
+        }
+
+        canvas.drawText(percentage, x + xShift, y, mDebugPaint);
+        y += instrumentHeight + mPercentageBottomMargin;
+        canvas.drawText(instrumentName, x + xShift, y, mDebugPaint);
     }
 
     @Override

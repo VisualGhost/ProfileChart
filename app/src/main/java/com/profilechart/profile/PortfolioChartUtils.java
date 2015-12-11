@@ -81,7 +81,7 @@ public class PortfolioChartUtils {
      */
     public static String angleToPercentage(float angle) {
         try {
-            return formatPercentage(angle / ANGLE_OF_ONE_PERCENTAGE)+" %";
+            return formatPercentage(angle / ANGLE_OF_ONE_PERCENTAGE) + " %";
         } catch (NumberFormatException e) {
             return "";
         } catch (IllegalFormatException e) {
@@ -117,15 +117,19 @@ public class PortfolioChartUtils {
         return (float) Math.sin((angle + sweepAngle / 2) * Math.PI / 180) * radius;
     }
 
-    public static RectF getRectF(Paint paint, float startAngle, float sweetAngle, float radius, String text) {
-        float width = paint.measureText(text, 0, text.length());
-        radius += 100;
+    public static RectF getTextBoxRectF(
+            float radius,
+            float startAngle,
+            float sweetAngle,
+            float textWidth,
+            float textHeight
+    ) {
         float x = PortfolioChartUtils.getCenterSectorX(startAngle, sweetAngle, radius);
         float y = PortfolioChartUtils.getCenterSectorY(startAngle, sweetAngle, radius);
-        float left = x - width / 2;
-        float top = y - width / 2;
-        float right = x + width / 2;
-        float bottom = y + width / 2;
+        float left = x - textWidth / 2;
+        float top = y - textHeight / 2;
+        float right = x + textWidth / 2;
+        float bottom = y + textHeight / 2;
         return new RectF(left, top, right, bottom);
     }
 
@@ -150,11 +154,11 @@ public class PortfolioChartUtils {
     // TODO parse cursor
     public static List<PortfolioBreakdown> getBreakdownList(Cursor cursor) {
         List<PortfolioBreakdown> list = new ArrayList<>();
-        list.add(new PortfolioBreakdownImpl("ADIDAS", "0.156339", "0.232918"));
-        list.add(new PortfolioBreakdownImpl("AUDJPY", "0.200099", "-0.000253"));
-        list.add(new PortfolioBreakdownImpl("USDJPY", "0.150099", "0.000253"));
-        list.add(new PortfolioBreakdownImpl("USDJPYBLAA", "0.300099", "0.00253"));
-//        list.add(new PortfolioBreakdownImpl("USDJPY", "0.180099", "0.000253"));
+        list.add(new PortfolioBreakdownImpl("ADIDAS", "1", "0.232918"));
+//        list.add(new PortfolioBreakdownImpl("AUDJPY", "0.50", "-0.000253"));
+//        list.add(new PortfolioBreakdownImpl("USDJPY", "0.150099", "0.000253"));
+////      list.add(new PortfolioBreakdownImpl("USDJPY", "0.200099", "0.00253"));
+////        list.add(new PortfolioBreakdownImpl("USDJPY", "0.180099", "0.000253"));
         return list;
     }
 

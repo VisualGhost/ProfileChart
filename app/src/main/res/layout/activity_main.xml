@@ -26,7 +26,7 @@
         app:percentageBottomMargin="@dimen/profile_chart_percentage_bottom_margin"
         app:percentageTextSize="@dimen/profile_chart_percentage_text_size"
         app:profileChartDebugMode="true"
-        app:profileChartScale="3"
+        app:profileChartScale="4"
         app:strokeRadius="@dimen/profile_chart_stroke_radius"
         app:strokeWidth="@dimen/profile_chart_stroke_width"
         app:strokeWidthSelected="@dimen/profile_chart_stroke_selected_width"
