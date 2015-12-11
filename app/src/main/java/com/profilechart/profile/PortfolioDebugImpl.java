@@ -4,6 +4,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.util.Log;
 
 public class PortfolioDebugImpl implements PortfolioDebug {
 
@@ -91,6 +92,19 @@ public class PortfolioDebugImpl implements PortfolioDebug {
 
         y = rectF.centerY() + PortfolioChartUtils.getHeight(mDebugPaint, instrumentName) + mPercentageBottomMargin;
         canvas.drawText(instrumentName, x, y, mDebugPaint);
+        //------------------Find max length ----------------------------
+        float cX = rectF1.centerX();
+        float cY = rectF1.centerY();
+        float radiusToCenterOfBox = (float) Math.sqrt(cX * cX + cY * cY);
+        float angle = startAngle + sweetAngle / 2;
+        float hypot;
+        if (Math.sin(angle * Math.PI / 180) != 0) {
+            hypot = (float) (Math.abs(rectF1.height() / 2 / Math.sin(angle * Math.PI / 180)));
+        } else {
+            hypot = rectF1.height() / 2;
+        }
+        float d = radiusToCenterOfBox - hypot;
+        Log.e("Test", instrumentName + ", " + percentage + ", " + (d - radius));
     }
 
     @Override
