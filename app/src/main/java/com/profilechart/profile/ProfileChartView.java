@@ -155,7 +155,9 @@ public class ProfileChartView extends View implements ProfileChart {
                     index++;
                 }
             }
-            drawOthers(canvas, index);
+            if (Float.compare(mAngleManager.getTotalSweepAngle(), 0) != 0) {
+                drawOthers(canvas, index);
+            }
         }
     }
 

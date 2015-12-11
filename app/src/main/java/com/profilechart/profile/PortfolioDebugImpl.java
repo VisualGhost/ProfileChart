@@ -56,7 +56,7 @@ public class PortfolioDebugImpl implements PortfolioDebug {
     public void drawCircleAroundPie(final Canvas canvas) {
         float r = mArcRadius + mCircleMargin;
         RectF rectF = new RectF(-r, -r, r, r);
-        canvas.drawArc(rectF, 0, -360, false, mDebugPaint);
+        //canvas.drawArc(rectF, 0, -360, false, mDebugPaint);
     }
 
     @Override
@@ -66,7 +66,7 @@ public class PortfolioDebugImpl implements PortfolioDebug {
         float radius = (float) Math.sqrt(mWidth * mWidth + mHeight * mHeight);
         float endX = PortfolioChartUtils.getCenterSectorX(startAngle, sweetAngle, radius);
         float endY = PortfolioChartUtils.getCenterSectorY(startAngle, sweetAngle, radius);
-        canvas.drawLine(startX, startY, endX, endY, mDebugPaint);
+        //canvas.drawLine(startX, startY, endX, endY, mDebugPaint);
     }
 
     @Override
@@ -98,7 +98,7 @@ public class PortfolioDebugImpl implements PortfolioDebug {
         Log.e("Test2", " angle: " + angle + ", " + percentage + ", " + (2 * radius - d));
 
         textBox = PortfolioChartUtils.getTextBoxRectF(2 * radius - d, startAngle, sweetAngle, textWidth, textHeight);
-        canvas.drawRect(textBox, mDebugPaint);
+        //canvas.drawRect(textBox, mDebugPaint);
         //Log.e("Test", instrumentName + ", " + percentage + ", " + (d - radius));
         float x = textBox.left;
         float y = textBox.top + percentageHeight;
