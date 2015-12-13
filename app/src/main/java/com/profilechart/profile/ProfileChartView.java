@@ -12,6 +12,7 @@ import android.view.View;
 
 import com.profilechart.R;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProfileChartView extends View implements ProfileChart {
@@ -39,6 +40,7 @@ public class ProfileChartView extends View implements ProfileChart {
     private int mSelectedSectorIndex = -1;
     private String mPlString;
     private String mOthersString;
+    private List<Drawable> mDrawables;
 
     public ProfileChartView(final Context context) {
         super(context);
@@ -74,6 +76,7 @@ public class ProfileChartView extends View implements ProfileChart {
             mInstrumentNameTextSize = mScale * array.getDimension(R.styleable.ProfileChart_instrumentNameTextSize, 0f);
             mPlString = context.getString(R.string.pl);
             mOthersString = context.getString(R.string.others);
+            mDrawables = new ArrayList<>();
             initWidgetParams(context, mScale);
             initPaintFactory(arcWidth, mSelectedArcWidth);
             initDebug();
@@ -163,9 +166,7 @@ public class ProfileChartView extends View implements ProfileChart {
 
     private void drawInstrumentSector(Canvas canvas, int index, PortfolioBreakdown breakdown) {
         drawStroke(canvas, index, mAngleManager.getStartAngle(index), mAngleManager.getSweepAngle(index));
-        if (index == mSelectedSectorIndex) {
-            drawPLTextInsideCircle(canvas, getPLInstrumentName(breakdown.getInstrumentName()), breakdown.getPLPercentage());
-        }
+        drawTextInsideCircle(canvas, index);
         if (mIsDebugMode) {
             drawDebugElements(canvas, breakdown.getInstrumentName(), breakdown.getAllocationPercentage(), mAngleManager.getStartAngle(index), mAngleManager.getSweepAngle(index));
         }
@@ -179,6 +180,18 @@ public class ProfileChartView extends View implements ProfileChart {
             paint = mPaintFactory.getPaint(index);
         }
         canvas.drawArc(mRectF, startAngle, sweepAngle, false, paint);
+    }
+
+    private void drawTextInsideCircle(Canvas canvas, int index) {
+        if (index == mSelectedSectorIndex) {
+            Drawable drawable = mDrawables.size() > index ? mDrawables.get(index) : null;
+            if (drawable != null) {
+                canvas.drawText(drawable.instrumentName, drawable.instrumentNameX, drawable.instrumentNameY, mPaintFactory.getPLPaint());
+                if (!TextUtils.isEmpty(drawable.percentage)) {
+                    canvas.drawText(drawable.percentage, drawable.percentageX, drawable.percentageY, getPLValuePaint(drawable.percentage));
+                }
+            }
+        }
     }
 
     private void drawOthers(Canvas canvas, int index) {
@@ -195,31 +208,52 @@ public class ProfileChartView extends View implements ProfileChart {
         mDebug.drawSectorLine(canvas, startAngle);
     }
 
-    private void drawPLTextInsideCircle(Canvas canvas, String instrumentName, String plValue) {
+    private static class Drawable {
+        String instrumentName;
+        String percentage;
+        float instrumentNameX;
+        float instrumentNameY;
+        float percentageX;
+        float percentageY;
+    }
+
+    private void initDrawable(String instrumentName, String plValue) {
         float width = getPLTextWidth(instrumentName, plValue);
         RectF allowRectF = Utils.getRectFAroundCircle(mArcRadius, mSelectedArcWidth);
         float xShift = -width / 2;
         float yShift = Utils.getHeight(mPaintFactory.getPLPaint(), instrumentName) / 2;
         if (width > allowRectF.width()) {
-            drawClipPL(canvas, instrumentName, plValue, allowRectF.width(), yShift);
+            initClipDrawable(instrumentName, plValue, allowRectF.width(), yShift);
         } else {
-            canvas.drawText(instrumentName, xShift, yShift, mPaintFactory.getPLPaint());
             float instrumentNameWidth = Utils.getWidth(mPaintFactory.getPLPaint(), instrumentName);
-            canvas.drawText(plValue, xShift + instrumentNameWidth, yShift, getPLValuePaint(plValue));
+            Drawable drawable = new Drawable();
+            drawable.instrumentName = instrumentName;
+            drawable.percentage = plValue;
+            drawable.instrumentNameX = xShift;
+            drawable.instrumentNameY = yShift;
+            drawable.percentageX = xShift + instrumentNameWidth;
+            drawable.percentageY = yShift;
+            mDrawables.add(drawable);
         }
     }
 
-    private void drawClipPL(Canvas canvas, final String instrumentName, final String pLValue, float avail, float yShift) {
+    private void initClipDrawable(final String instrumentName, final String pLValue, float avail, float yShift) {
         String ellipsizedPLText = getEllipsizedPLText(instrumentName, pLValue, avail);
-        int index = getIndexOfPLValue(ellipsizedPLText);
+        int indexInString = getIndexOfPLValue(ellipsizedPLText);
         float ellipsizedPLTextWidth = Utils.getWidth(mPaintFactory.getPLPaint(), ellipsizedPLText);
-        String clipPLValue = getClipPLValue(index, ellipsizedPLText);
-        ellipsizedPLText = getEllipsizedPLTextWithoutPLValue(ellipsizedPLText, index);
+        String clipPLValue = getClipPLValue(indexInString, ellipsizedPLText);
+        ellipsizedPLText = getEllipsizedPLTextWithoutPLValue(ellipsizedPLText, indexInString);
         float xShift = -ellipsizedPLTextWidth / 2;
-        canvas.drawText(ellipsizedPLText, xShift, yShift, mPaintFactory.getPLPaint());
+        Drawable drawable = new Drawable();
+        drawable.instrumentName = ellipsizedPLText;
+        drawable.instrumentNameX = xShift;
+        drawable.instrumentNameY = yShift;
         if (!TextUtils.isEmpty(clipPLValue)) {
-            canvas.drawText(clipPLValue, xShift + Utils.getWidth(mPaintFactory.getPLPaint(), ellipsizedPLText), yShift, getPLValuePaint(pLValue));
+            drawable.percentage = clipPLValue;
+            drawable.percentageX = xShift + Utils.getWidth(mPaintFactory.getPLPaint(), ellipsizedPLText);
+            drawable.percentageY = yShift;
         }
+        mDrawables.add(drawable);
     }
 
     private String getEllipsizedPLText(final String instrumentName, final String pLValue, float avail) {
@@ -272,6 +306,11 @@ public class ProfileChartView extends View implements ProfileChart {
     public void draw(final List<PortfolioBreakdown> breakdownList) {
         if (breakdownList != null) {
             mBreakdownList = breakdownList;
+            for (PortfolioBreakdown breakdown : breakdownList) {
+                if (breakdown.isDrawable()) {
+                    initDrawable(getPLInstrumentName(breakdown.getInstrumentName()), breakdown.getPLPercentage());
+                }
+            }
             mAngleManager = new AngleManagerImpl(PieDirection.COUNTERCLOCKWISE, breakdownList);
             if (mPieTouchListener != null) {
                 mPieTouchListener.setBreakdownList(mBreakdownList);
