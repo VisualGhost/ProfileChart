@@ -141,7 +141,7 @@ public class ProfileChartView extends View implements ProfileChart {
      */
     private void drawDebugElements(Canvas canvas) {
         mDebug.drawCircleAroundPie(canvas);
-        mDebug.drawBoxInsideCircle(canvas);
+        mDebug.drawSquareInsideCircle(canvas);
         mDebug.drawXAxis(canvas);
         mDebug.drawYAxis(canvas);
     }
@@ -190,7 +190,7 @@ public class ProfileChartView extends View implements ProfileChart {
     }
 
     private void drawDebugElements(Canvas canvas, String instrumentName, String percentage, float startAngle, float sweepAngle) {
-        mDebug.drawLine(canvas, startAngle, sweepAngle);
+        mDebug.drawCenterOfSector(canvas, startAngle, sweepAngle);
         mDebug.drawTextBox(canvas, startAngle, sweepAngle, instrumentName, percentage);
         mDebug.drawSector(canvas, startAngle, sweepAngle);
     }

@@ -2,13 +2,17 @@ package com.profilechart.profile;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.DashPathEffect;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.RectF;
 import android.util.Log;
 
 public class PortfolioDebugImpl implements PortfolioDebug {
 
     private Paint mDebugPaint;
+    private Paint mDushedPaint;
+
     private float mWidth;
     private float mHeight;
     private float mArcRadius;
@@ -35,38 +39,45 @@ public class PortfolioDebugImpl implements PortfolioDebug {
 
     private void initDebugPaint(float scale) {
         mDebugPaint = new Paint();
-        mDebugPaint.setStrokeWidth(1 * scale);
-        mDebugPaint.setTextSize(12 * scale);
+        mDebugPaint.setStrokeWidth(1 * scale); // TODO
+        mDebugPaint.setTextSize(12 * scale);// TODO
         mDebugPaint.setStyle(Paint.Style.STROKE);
         mDebugPaint.setColor(Color.CYAN);
         mDebugPaint.setAntiAlias(true);
+
+        mDushedPaint = new Paint(mDebugPaint);
+        mDushedPaint.setPathEffect(new DashPathEffect(new float[]{10, 20}, 0));
     }
 
     @Override
     public void drawXAxis(final Canvas canvas) {
-        //canvas.drawLine(-mWidth / 2, 0, mWidth / 2, 0, mDebugPaint);
+        canvas.drawLine(-mWidth / 2, 0, mWidth / 2, 0, mDebugPaint);
     }
 
     @Override
     public void drawYAxis(final Canvas canvas) {
-        //canvas.drawLine(0, -mWidth / 2, 0, mWidth / 2, mDebugPaint);
+        canvas.drawLine(0, -mWidth / 2, 0, mWidth / 2, mDebugPaint);
     }
 
     @Override
     public void drawCircleAroundPie(final Canvas canvas) {
         float r = mArcRadius + mCircleMargin;
         RectF rectF = new RectF(-r, -r, r, r);
-        //canvas.drawArc(rectF, 0, -360, false, mDebugPaint);
+        canvas.drawArc(rectF, 0, -360, false, mDebugPaint);
     }
 
     @Override
-    public void drawLine(final Canvas canvas, final float startAngle, final float sweetAngle) {
+    public void drawCenterOfSector(final Canvas canvas, final float startAngle, final float sweetAngle) {
         float startX = 0;
         float startY = 0;
-        float radius = (float) Math.sqrt(mWidth * mWidth + mHeight * mHeight);
-        float endX = PortfolioChartUtils.getCenterSectorX(startAngle, sweetAngle, radius);
-        float endY = PortfolioChartUtils.getCenterSectorY(startAngle, sweetAngle, radius);
-        //canvas.drawLine(startX, startY, endX, endY, mDebugPaint);
+        float r = mArcRadius + mCircleMargin;
+        float endX = PortfolioChartUtils.getCenterSectorX(startAngle, sweetAngle, r);
+        float endY = PortfolioChartUtils.getCenterSectorY(startAngle, sweetAngle, r);
+
+        Path path = new Path();
+        path.moveTo(startX, startY);
+        path.lineTo(endX, endY);
+        canvas.drawPath(path, mDushedPaint);
     }
 
     @Override
@@ -155,15 +166,15 @@ public class PortfolioDebugImpl implements PortfolioDebug {
     public void drawSector(Canvas canvas, float startAngle, float sweetAngle) {
         float startX = 0;
         float startY = 0;
-        float radius = (float) Math.sqrt(mWidth * mWidth + mHeight * mHeight);
-        float endX = PortfolioChartUtils.getX(startAngle, radius);
-        float endY = PortfolioChartUtils.getY(startAngle, radius);
-        //canvas.drawLine(startX, startY, endX, endY, mDebugPaint);
+        float r = mArcRadius + mCircleMargin;
+        float endX = PortfolioChartUtils.getX(startAngle, r);
+        float endY = PortfolioChartUtils.getY(startAngle, r);
+        canvas.drawLine(startX, startY, endX, endY, mDebugPaint);
     }
 
     @Override
-    public void drawBoxInsideCircle(final Canvas canvas) {
+    public void drawSquareInsideCircle(final Canvas canvas) {
         RectF rectF = PortfolioChartUtils.getRectFAroundCircle(mArcRadius, mSelectedArcWidth);
-        //canvas.drawRect(rectF, mDebugPaint);
+        canvas.drawRect(rectF, mDebugPaint);
     }
 }
