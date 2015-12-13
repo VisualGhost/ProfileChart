@@ -19,7 +19,7 @@ public class PortfolioBreakdownImpl implements PortfolioBreakdown {
         mInstrumentName = instrumentName;
         mAllocationPercentage = allocationPercentage;
         mPLPercentage = PLPercentage;
-        mAngle = PortfolioChartUtils.percentageToAngle(allocationPercentage);
+        mAngle = Utils.percentageToAngle(allocationPercentage);
     }
 
     @Override
@@ -29,12 +29,12 @@ public class PortfolioBreakdownImpl implements PortfolioBreakdown {
 
     @Override
     public String getAllocationPercentage() {
-        return PortfolioChartUtils.getReadablePercentage(mAllocationPercentage); // 12.22%
+        return Utils.getReadablePercentage(mAllocationPercentage); // 12.22%
     }
 
     @Override
     public String getPLPercentage() {
-        return PortfolioChartUtils.getReadablePL(mPLPercentage); // 12.22
+        return Utils.getReadablePL(mPLPercentage); // 12.22
     }
 
     @Override

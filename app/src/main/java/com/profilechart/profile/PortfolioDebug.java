@@ -27,15 +27,14 @@ public interface PortfolioDebug {
      */
     void drawCenterOfSector(Canvas canvas, float startAngle, float sweetAngle);
 
-    void drawTextBox(Canvas canvas, float startAngle, float sweetAngle, String instrumentName, String percentage);
+    void drawText(Canvas canvas, float startAngle, float sweetAngle, String instrumentName, String percentage);
 
     /**
-     * Draws two lines.
+     * Draws the line indicating the new sector.
      *
      * @param startAngle The angle of starting sector.
-     * @param sweetAngle The range of sector.
      */
-    void drawSector(Canvas canvas, float startAngle, float sweetAngle);
+    void drawSectorLine(Canvas canvas, float startAngle);
 
     /**
      * This square shows us the area where we can put the text inside the circle and it won't cross with stroke.

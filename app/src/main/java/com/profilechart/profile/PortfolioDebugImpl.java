@@ -56,23 +56,27 @@ public class PortfolioDebugImpl implements PortfolioDebug {
 
     @Override
     public void drawYAxis(final Canvas canvas) {
-        canvas.drawLine(0, -mWidth / 2, 0, mWidth / 2, mDebugPaint);
+        canvas.drawLine(0, -mHeight / 2, 0, mHeight / 2, mDebugPaint);
     }
 
     @Override
     public void drawCircleAroundPie(final Canvas canvas) {
-        float r = mArcRadius + mCircleMargin;
+        float r = getRadius();
         RectF rectF = new RectF(-r, -r, r, r);
         canvas.drawArc(rectF, 0, -360, false, mDebugPaint);
+    }
+
+    private float getRadius() {
+        return mArcRadius + mCircleMargin;
     }
 
     @Override
     public void drawCenterOfSector(final Canvas canvas, final float startAngle, final float sweetAngle) {
         float startX = 0;
         float startY = 0;
-        float r = mArcRadius + mCircleMargin;
-        float endX = PortfolioChartUtils.getCenterSectorX(startAngle, sweetAngle, r);
-        float endY = PortfolioChartUtils.getCenterSectorY(startAngle, sweetAngle, r);
+        float r = getRadius();
+        float endX = Utils.getCenterSectorX(startAngle, sweetAngle, r);
+        float endY = Utils.getCenterSectorY(startAngle, sweetAngle, r);
 
         Path path = new Path();
         path.moveTo(startX, startY);
@@ -81,72 +85,77 @@ public class PortfolioDebugImpl implements PortfolioDebug {
     }
 
     @Override
-    public void drawTextBox(final Canvas canvas, final float startAngle, final float sweetAngle,
-                            final String instrumentName, final String percentage) {
-        // TODO not a clean code
-        float radius = mArcRadius + mCircleMargin;
-        float textWidth = Math.max(PortfolioChartUtils.getWidth(mDebugPaint, instrumentName),
-                PortfolioChartUtils.getWidth(mDebugPaint, percentage));
-        float instrumentHeight = PortfolioChartUtils.getHeight(mDebugPaint, instrumentName);
-        float percentageHeight = PortfolioChartUtils.getHeight(mDebugPaint, percentage);
-        float textHeight = instrumentHeight + mPercentageBottomMargin + percentageHeight;
-        RectF textBox = PortfolioChartUtils.getTextBoxRectF(radius, startAngle, sweetAngle, textWidth, textHeight);
-        //canvas.drawRect(textBox, mDebugPaint);
+    public void drawText(final Canvas canvas, final float startAngle, final float sweetAngle,
+                         final String instrumentName, final String percentage) {
 
-        float cX = textBox.centerX();
-        float cY = textBox.centerY();
-        float radiusToCenterOfBox = (float) Math.sqrt(cX * cX + cY * cY);
-        float angle = startAngle + sweetAngle / 2;
-        float hypot;
+        float commonWidth = Math.max(Utils.getWidth(mDebugPaint, instrumentName),
+                Utils.getWidth(mDebugPaint, percentage));
+        float instrumentHeight = Utils.getHeight(mDebugPaint, instrumentName);
+        float percentageHeight = Utils.getHeight(mDebugPaint, percentage);
+        float commonHeight = instrumentHeight + percentageHeight + mPercentageBottomMargin;
+        RectF textBox = getTextRectF(startAngle, sweetAngle, commonWidth, commonHeight);
+        float angle = getAngle(startAngle, sweetAngle);
+        float halfOfDiagonal = getHalfOfDiagonal(textBox, angle);
+        float distanceToCenterOfTextBox = getDistanceToCenterOfRectF(textBox);
+        textBox = getShiftedRectF(textBox, startAngle, sweetAngle, halfOfDiagonal + distanceToCenterOfTextBox);
+        float xPercentage = textBox.left;
+        float yPercentage = textBox.top + percentageHeight;
+        float xShift = getXShift(textBox, angle, getRadius());
+        canvas.drawText(percentage, xPercentage + xShift, yPercentage, mDebugPaint);
+        yPercentage += instrumentHeight + mPercentageBottomMargin;
+        canvas.drawText(instrumentName, xPercentage + xShift, yPercentage, mDebugPaint);
+    }
+
+    private RectF getTextRectF(final float startAngle,
+                               final float sweetAngle,
+                               final float width,
+                               final float height) {
+        return Utils.getTextRectF(getRadius(), startAngle, sweetAngle, width, height);
+    }
+
+    private float getHalfOfDiagonal(final RectF rectF, float angle) {
+        float diagonal;
         if (Double.compare(Math.sin(angle * Math.PI / 180), 0) != 0) {
-            hypot = (float) (Math.abs(textBox.height() / 2 / Math.sin(angle * Math.PI / 180)));
+            diagonal = (float) (Math.abs(rectF.height() / 2 / Math.sin(angle * Math.PI / 180)));
         } else {
-            hypot = textBox.height() / 2;
+            diagonal = rectF.height() / 2;
         }
-        hypot = Math.min(hypot, textBox.height() / 2);
-        float d = radiusToCenterOfBox - hypot;
+        return Math.min(diagonal, rectF.height() / 2);
+    }
 
-        Log.e("Test2", " angle: " + angle + ", " + percentage + ", " + (2 * radius - d));
+    private float getAngle(final float startAngle, final float sweetAngle) {
+        return startAngle + sweetAngle / 2;
+    }
 
-        textBox = PortfolioChartUtils.getTextBoxRectF(2 * radius - d, startAngle, sweetAngle, textWidth, textHeight);
-        //canvas.drawRect(textBox, mDebugPaint);
-        //Log.e("Test", instrumentName + ", " + percentage + ", " + (d - radius));
-        float x = textBox.left;
-        float y = textBox.top + percentageHeight;
+    private float getDistanceToCenterOfRectF(final RectF rectF) {
+        float cX = rectF.centerX();
+        float cY = rectF.centerY();
+        return (float) Math.sqrt(cX * cX + cY * cY);
+    }
 
-        float x1 = textBox.left;
-        float x2 = textBox.right;
-        float y1;
+    private RectF getShiftedRectF(final RectF rectF, final float startAngle, final float sweetAngle, float distance) {
+        return Utils.getTextRectF(distance, startAngle, sweetAngle, rectF.width(), rectF.height());
+    }
+
+    private float getXCoordinateOfIntersectionBetweenCircleAndRectF(final RectF textBox, final float angle, float radius) {
+        float y;
         if (-angle >= 180 && -angle <= 360) {
-            y1 = textBox.top;
+            y = textBox.top;
         } else {
-            y1 = textBox.bottom;
+            y = textBox.bottom;
         }
-        float xPoint = (float) (Math.sqrt(radius * radius - y1 * y1));
+        return (float) (Math.sqrt(radius * radius - y * y));
+    }
+
+    private float getXShift(final RectF textBox, final float angle, float radius) {
+        float xIntersection = getXCoordinateOfIntersectionBetweenCircleAndRectF(textBox, angle, radius);
 
         float xShift;
         if (-angle >= 90 && -angle <= 270) {
-            xPoint = -xPoint;
-            xShift = xPoint - textBox.right;
+            xIntersection = -xIntersection;
+            xShift = xIntersection - textBox.right;
         } else {
-            xShift = xPoint - textBox.left;
-        }
-
-        //TODO find yShift
-
-        float yShift;
-
-        if (-angle >= 0 && -angle <= 180) {
-            yShift = Math.abs(textBox.bottom);
-            float r = (float) (radius * Math.sin(angle * Math.PI / 180));
-            if (Float.compare(-r, yShift) == 0) {
-                //xShift = 0;
-            }
-            //Log.e("Test", ">>> " + instrumentName + ", " + percentage + ", " + yShift + ", r: " + r+", "+xShift);
-        }
-
-        if (xPoint >= textBox.left && xPoint <= textBox.right) {
-            Log.e("Test", "x: " + xPoint + ", " + x1 + ", " + x2 + ", " + instrumentName + ", " + percentage + ", " + xShift);
+            xShift = xIntersection - textBox.left;
         }
 
         if (-angle > 85 && -angle < 105) {
@@ -156,25 +165,22 @@ public class PortfolioDebugImpl implements PortfolioDebug {
         if (-angle > 265 && -angle < 275) {
             xShift = 0;
         }
-
-        canvas.drawText(percentage, x + xShift, y, mDebugPaint);
-        y += instrumentHeight + mPercentageBottomMargin;
-        canvas.drawText(instrumentName, x + xShift, y, mDebugPaint);
+        return xShift;
     }
 
     @Override
-    public void drawSector(Canvas canvas, float startAngle, float sweetAngle) {
+    public void drawSectorLine(Canvas canvas, float startAngle) {
         float startX = 0;
         float startY = 0;
-        float r = mArcRadius + mCircleMargin;
-        float endX = PortfolioChartUtils.getX(startAngle, r);
-        float endY = PortfolioChartUtils.getY(startAngle, r);
+        float r = getRadius();
+        float endX = Utils.getX(startAngle, r);
+        float endY = Utils.getY(startAngle, r);
         canvas.drawLine(startX, startY, endX, endY, mDebugPaint);
     }
 
     @Override
     public void drawSquareInsideCircle(final Canvas canvas) {
-        RectF rectF = PortfolioChartUtils.getRectFAroundCircle(mArcRadius, mSelectedArcWidth);
+        RectF rectF = Utils.getRectFAroundCircle(mArcRadius, mSelectedArcWidth);
         canvas.drawRect(rectF, mDebugPaint);
     }
 }

@@ -185,26 +185,26 @@ public class ProfileChartView extends View implements ProfileChart {
         drawStroke(canvas, index, mAngleManager.getStartAngle(index), mAngleManager.getTotalSweepAngle());
         if (mIsDebugMode) {
             float sweepAngle = mAngleManager.getTotalSweepAngle();
-            drawDebugElements(canvas, mOthersString, PortfolioChartUtils.angleToPercentage(Math.abs(sweepAngle)), mAngleManager.getStartAngle(index), sweepAngle);
+            drawDebugElements(canvas, mOthersString, Utils.angleToPercentage(Math.abs(sweepAngle)), mAngleManager.getStartAngle(index), sweepAngle);
         }
     }
 
     private void drawDebugElements(Canvas canvas, String instrumentName, String percentage, float startAngle, float sweepAngle) {
         mDebug.drawCenterOfSector(canvas, startAngle, sweepAngle);
-        mDebug.drawTextBox(canvas, startAngle, sweepAngle, instrumentName, percentage);
-        mDebug.drawSector(canvas, startAngle, sweepAngle);
+        mDebug.drawText(canvas, startAngle, sweepAngle, instrumentName, percentage);
+        mDebug.drawSectorLine(canvas, startAngle);
     }
 
     private void drawPLTextInsideCircle(Canvas canvas, String instrumentName, String plValue) {
         float width = getPLTextWidth(instrumentName, plValue);
-        RectF allowRectF = PortfolioChartUtils.getRectFAroundCircle(mArcRadius, mSelectedArcWidth);
+        RectF allowRectF = Utils.getRectFAroundCircle(mArcRadius, mSelectedArcWidth);
         float xShift = -width / 2;
-        float yShift = PortfolioChartUtils.getHeight(mPaintFactory.getPLPaint(), instrumentName) / 2;
+        float yShift = Utils.getHeight(mPaintFactory.getPLPaint(), instrumentName) / 2;
         if (width > allowRectF.width()) {
             drawClipPL(canvas, instrumentName, plValue, allowRectF.width(), yShift);
         } else {
             canvas.drawText(instrumentName, xShift, yShift, mPaintFactory.getPLPaint());
-            float instrumentNameWidth = PortfolioChartUtils.getWidth(mPaintFactory.getPLPaint(), instrumentName);
+            float instrumentNameWidth = Utils.getWidth(mPaintFactory.getPLPaint(), instrumentName);
             canvas.drawText(plValue, xShift + instrumentNameWidth, yShift, getPLValuePaint(plValue));
         }
     }
@@ -212,13 +212,13 @@ public class ProfileChartView extends View implements ProfileChart {
     private void drawClipPL(Canvas canvas, final String instrumentName, final String pLValue, float avail, float yShift) {
         String ellipsizedPLText = getEllipsizedPLText(instrumentName, pLValue, avail);
         int index = getIndexOfPLValue(ellipsizedPLText);
-        float ellipsizedPLTextWidth = PortfolioChartUtils.getWidth(mPaintFactory.getPLPaint(), ellipsizedPLText);
+        float ellipsizedPLTextWidth = Utils.getWidth(mPaintFactory.getPLPaint(), ellipsizedPLText);
         String clipPLValue = getClipPLValue(index, ellipsizedPLText);
         ellipsizedPLText = getEllipsizedPLTextWithoutPLValue(ellipsizedPLText, index);
         float xShift = -ellipsizedPLTextWidth / 2;
         canvas.drawText(ellipsizedPLText, xShift, yShift, mPaintFactory.getPLPaint());
         if (!TextUtils.isEmpty(clipPLValue)) {
-            canvas.drawText(clipPLValue, xShift + PortfolioChartUtils.getWidth(mPaintFactory.getPLPaint(), ellipsizedPLText), yShift, getPLValuePaint(pLValue));
+            canvas.drawText(clipPLValue, xShift + Utils.getWidth(mPaintFactory.getPLPaint(), ellipsizedPLText), yShift, getPLValuePaint(pLValue));
         }
     }
 

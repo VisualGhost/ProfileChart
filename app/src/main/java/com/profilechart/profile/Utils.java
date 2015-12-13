@@ -9,18 +9,19 @@ import java.util.ArrayList;
 import java.util.IllegalFormatException;
 import java.util.List;
 
-public class PortfolioChartUtils {
+// TODO public
+public class Utils {
 
     private static final float ANGLE_OF_ONE_PERCENTAGE = 3.6f; // 360o/100% = 3.6o
 
-    private PortfolioChartUtils() {
+    private Utils() {
         // to hide
     }
 
     /**
      * Converts '0.123456' to '12.35%'
      */
-    public static String getReadablePercentage(String percentage) {
+    static String getReadablePercentage(String percentage) {
         return roundUp(percentage, " %");
     }
 
@@ -42,7 +43,7 @@ public class PortfolioChartUtils {
     /**
      * Converts '0.123456' to '12.35'
      */
-    public static String getReadablePL(String pl) {
+    static String getReadablePL(String pl) {
         return roundUp(pl, null);
     }
 
@@ -53,7 +54,7 @@ public class PortfolioChartUtils {
     /**
      * @return The angle of sector on chart.
      */
-    public static float percentageToAngle(String percentage) {
+    static float percentageToAngle(String percentage) {
         if (percentage != null) {
             try {
                 return ANGLE_OF_ONE_PERCENTAGE * Float.valueOf(percentage) * 100;
@@ -68,7 +69,7 @@ public class PortfolioChartUtils {
     /**
      * @return The angle of sector on chart.
      */
-    public static float percentageToAngle(float percentage) {
+    static float percentageToAngle(float percentage) {
         try {
             return ANGLE_OF_ONE_PERCENTAGE * percentage * 100;
         } catch (NumberFormatException e) {
@@ -79,7 +80,7 @@ public class PortfolioChartUtils {
     /**
      * Converts e.g. 36o to 10.00%
      */
-    public static String angleToPercentage(float angle) {
+    static String angleToPercentage(float angle) {
         try {
             return formatPercentage(angle / ANGLE_OF_ONE_PERCENTAGE) + " %";
         } catch (NumberFormatException e) {
@@ -92,40 +93,40 @@ public class PortfolioChartUtils {
     /**
      * @param angle The angle in degrees
      */
-    public static float getX(float angle, float radius) {
+    static float getX(float angle, float radius) {
         return (float) Math.cos(angle * Math.PI / 180) * radius;
     }
 
     /**
      * @param angle The angle in degrees
      */
-    public static float getY(float angle, float radius) {
+    static float getY(float angle, float radius) {
         return (float) Math.sin(angle * Math.PI / 180) * radius;
     }
 
     /**
      * @param angle The angle in degrees
      */
-    public static float getCenterSectorX(float angle, float sweepAngle, float radius) {
+    static float getCenterSectorX(float angle, float sweepAngle, float radius) {
         return (float) Math.cos((angle + sweepAngle / 2) * Math.PI / 180) * radius;
     }
 
     /**
      * @param angle The angle in degrees
      */
-    public static float getCenterSectorY(float angle, float sweepAngle, float radius) {
+    static float getCenterSectorY(float angle, float sweepAngle, float radius) {
         return (float) Math.sin((angle + sweepAngle / 2) * Math.PI / 180) * radius;
     }
 
-    public static RectF getTextBoxRectF(
+    static RectF getTextRectF(
             float radius,
             float startAngle,
             float sweetAngle,
             float textWidth,
             float textHeight
     ) {
-        float x = PortfolioChartUtils.getCenterSectorX(startAngle, sweetAngle, radius);
-        float y = PortfolioChartUtils.getCenterSectorY(startAngle, sweetAngle, radius);
+        float x = Utils.getCenterSectorX(startAngle, sweetAngle, radius);
+        float y = Utils.getCenterSectorY(startAngle, sweetAngle, radius);
         float left = x - textWidth / 2;
         float top = y - textHeight / 2;
         float right = x + textWidth / 2;
@@ -133,17 +134,17 @@ public class PortfolioChartUtils {
         return new RectF(left, top, right, bottom);
     }
 
-    public static float getHeight(Paint paint, String text) {
+    static float getHeight(Paint paint, String text) {
         Rect rect = new Rect();
         paint.getTextBounds(text, 0, text.length(), rect);
         return rect.height();
     }
 
-    public static float getWidth(Paint paint, String text) {
+    static float getWidth(Paint paint, String text) {
         return paint.measureText(text);
     }
 
-    public static RectF getRectFAroundCircle(float arcRadius, float padding) {
+    static RectF getRectFAroundCircle(float arcRadius, float padding) {
         float left = -arcRadius + padding;
         float top = -arcRadius + padding;
         float right = arcRadius - padding;
@@ -151,7 +152,7 @@ public class PortfolioChartUtils {
         return new RectF(left, top, right, bottom);
     }
 
-    // TODO parse cursor
+    // TODO parse cursor. Remove this method
     public static List<PortfolioBreakdown> getBreakdownList(Cursor cursor) {
         List<PortfolioBreakdown> list = new ArrayList<>();
         list.add(new PortfolioBreakdownImpl("ADIDAS", "0.25", "0.232918"));

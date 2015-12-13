@@ -5,7 +5,7 @@ import com.profilechart.profile.AngleManagerImpl;
 import com.profilechart.profile.PieDirection;
 import com.profilechart.profile.PortfolioBreakdown;
 import com.profilechart.profile.PortfolioBreakdownImpl;
-import com.profilechart.profile.PortfolioChartUtils;
+import com.profilechart.profile.Utils;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -31,24 +31,24 @@ public class TestAngleManager {
     @Test
     public void getStartAngle_isCorrect() throws Exception {
         Assert.assertEquals(mClockWiseAngleManager.getStartAngle(0), 0f, 0.00001);
-        Assert.assertEquals(mClockWiseAngleManager.getStartAngle(1), PortfolioChartUtils.percentageToAngle("0.156339"), 0.00001);
+        Assert.assertEquals(mClockWiseAngleManager.getStartAngle(1), Utils.percentageToAngle("0.156339"), 0.00001);
         Assert.assertEquals(mCounterClockWiseAngleManager.getStartAngle(0), 0f, 0.00001);
-        Assert.assertEquals(mCounterClockWiseAngleManager.getStartAngle(1), -PortfolioChartUtils.percentageToAngle("0.156339"), 0.00001);
+        Assert.assertEquals(mCounterClockWiseAngleManager.getStartAngle(1), -Utils.percentageToAngle("0.156339"), 0.00001);
     }
 
     @Test
     public void getSweepAngle_isCorrect() throws Exception {
-        Assert.assertEquals(mClockWiseAngleManager.getSweepAngle(0), PortfolioChartUtils.percentageToAngle("0.156339"), 0.00001);
-        Assert.assertEquals(mClockWiseAngleManager.getSweepAngle(1), PortfolioChartUtils.percentageToAngle("0.300099"), 0.00001);
-        Assert.assertEquals(mCounterClockWiseAngleManager.getSweepAngle(0), -PortfolioChartUtils.percentageToAngle("0.156339"), 0.00001);
-        Assert.assertEquals(mCounterClockWiseAngleManager.getSweepAngle(1), -PortfolioChartUtils.percentageToAngle("0.300099"), 0.00001);
+        Assert.assertEquals(mClockWiseAngleManager.getSweepAngle(0), Utils.percentageToAngle("0.156339"), 0.00001);
+        Assert.assertEquals(mClockWiseAngleManager.getSweepAngle(1), Utils.percentageToAngle("0.300099"), 0.00001);
+        Assert.assertEquals(mCounterClockWiseAngleManager.getSweepAngle(0), -Utils.percentageToAngle("0.156339"), 0.00001);
+        Assert.assertEquals(mCounterClockWiseAngleManager.getSweepAngle(1), -Utils.percentageToAngle("0.300099"), 0.00001);
     }
 
     @Test
     public void getEndAngle_isCorrect() throws Exception {
-        Assert.assertEquals(mClockWiseAngleManager.getEndAngle(0), PortfolioChartUtils.percentageToAngle("0.156339"), 0.00001);
-        Assert.assertEquals(mClockWiseAngleManager.getEndAngle(1), PortfolioChartUtils.percentageToAngle("0.156339") + PortfolioChartUtils.percentageToAngle("0.300099"), 0.00001);
-        Assert.assertEquals(mCounterClockWiseAngleManager.getEndAngle(0), -PortfolioChartUtils.percentageToAngle("0.156339"), 0.00001);
-        Assert.assertEquals(mCounterClockWiseAngleManager.getEndAngle(1), -PortfolioChartUtils.percentageToAngle("0.156339") - PortfolioChartUtils.percentageToAngle("0.300099"), 0.00001);
+        Assert.assertEquals(mClockWiseAngleManager.getEndAngle(0), Utils.percentageToAngle("0.156339"), 0.00001);
+        Assert.assertEquals(mClockWiseAngleManager.getEndAngle(1), Utils.percentageToAngle("0.156339") + Utils.percentageToAngle("0.300099"), 0.00001);
+        Assert.assertEquals(mCounterClockWiseAngleManager.getEndAngle(0), -Utils.percentageToAngle("0.156339"), 0.00001);
+        Assert.assertEquals(mCounterClockWiseAngleManager.getEndAngle(1), -Utils.percentageToAngle("0.156339") - Utils.percentageToAngle("0.300099"), 0.00001);
     }
 }
