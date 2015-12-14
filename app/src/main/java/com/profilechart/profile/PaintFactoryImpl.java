@@ -93,12 +93,14 @@ public class PaintFactoryImpl implements PaintFactory {
     }
 
     @Override
-    public Paint getPercentagePaint() {
+    public Paint getPercentagePaint(int index) {
+        mPercentagePaint.setColor(mColorFactory.getColor(index));
         return mPercentagePaint;
     }
 
     @Override
-    public Paint getInstrumentNamePaint() {
+    public Paint getInstrumentNamePaint(int index) {
+        mInstrumentNamePaint.setColor(mColorFactory.getColor(index));
         return mInstrumentNamePaint;
     }
 

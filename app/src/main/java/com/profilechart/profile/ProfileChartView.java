@@ -40,7 +40,8 @@ public class ProfileChartView extends View implements ProfileChart {
     private int mSelectedSectorIndex = -1;
     private String mPlString;
     private String mOthersString;
-    private List<Drawable> mDrawables;
+    private List<InfoHolder> mTextInCircleInfoHolders;
+    private List<InfoHolder> mLabelInfoHolders;
 
     public ProfileChartView(final Context context) {
         super(context);
@@ -76,7 +77,8 @@ public class ProfileChartView extends View implements ProfileChart {
             mInstrumentNameTextSize = mScale * array.getDimension(R.styleable.ProfileChart_instrumentNameTextSize, 0f);
             mPlString = context.getString(R.string.pl);
             mOthersString = context.getString(R.string.others);
-            mDrawables = new ArrayList<>();
+            mTextInCircleInfoHolders = new ArrayList<>();
+            mLabelInfoHolders = new ArrayList<>();
             initWidgetParams(context, mScale);
             initPaintFactory(arcWidth, mSelectedArcWidth);
             initDebug();
@@ -89,7 +91,7 @@ public class ProfileChartView extends View implements ProfileChart {
     }
 
     private void initDebug() {
-        mDebug = new PortfolioDebugImpl(mWidth, mHeight, mArcRadius, mCircleMargin, mScale, mPercentageBottomMargin, mSelectedArcWidth);
+        mDebug = new PortfolioDebugImpl(mWidth, mHeight, mArcRadius, mCircleMargin, mScale, mSelectedArcWidth);
     }
 
     private void applyTouchListener() {
@@ -167,8 +169,20 @@ public class ProfileChartView extends View implements ProfileChart {
     private void drawInstrumentSector(Canvas canvas, int index, PortfolioBreakdown breakdown) {
         drawStroke(canvas, index, mAngleManager.getStartAngle(index), mAngleManager.getSweepAngle(index));
         drawTextInsideCircle(canvas, index);
+        obtainLabelInfo(canvas, mAngleManager.getStartAngle(index), mAngleManager.getSweepAngle(index), breakdown.getInstrumentName(), breakdown.getAllocationPercentage(), mPaintFactory.getInstrumentNamePaint(index));
+        drawLabel(canvas, index);
         if (mIsDebugMode) {
-            drawDebugElements(canvas, breakdown.getInstrumentName(), breakdown.getAllocationPercentage(), mAngleManager.getStartAngle(index), mAngleManager.getSweepAngle(index));
+            drawDebugElements(canvas, mAngleManager.getStartAngle(index), mAngleManager.getSweepAngle(index));
+        }
+    }
+
+    private void drawLabel(Canvas canvas, int index) {
+        if (mLabelInfoHolders != null) {
+            InfoHolder infoHolder = mLabelInfoHolders.size() > index ? mLabelInfoHolders.get(index) : null;
+            if (infoHolder != null) {
+                canvas.drawText(infoHolder.text1, infoHolder.xText1, infoHolder.yText1, mPaintFactory.getInstrumentNamePaint(index));
+                canvas.drawText(infoHolder.text2, infoHolder.xText2, infoHolder.yText2, mPaintFactory.getInstrumentNamePaint(index));
+            }
         }
     }
 
@@ -184,11 +198,11 @@ public class ProfileChartView extends View implements ProfileChart {
 
     private void drawTextInsideCircle(Canvas canvas, int index) {
         if (index == mSelectedSectorIndex) {
-            Drawable drawable = mDrawables.size() > index ? mDrawables.get(index) : null;
+            InfoHolder drawable = mTextInCircleInfoHolders.size() > index ? mTextInCircleInfoHolders.get(index) : null;
             if (drawable != null) {
-                canvas.drawText(drawable.instrumentName, drawable.instrumentNameX, drawable.instrumentNameY, mPaintFactory.getPLPaint());
-                if (!TextUtils.isEmpty(drawable.percentage)) {
-                    canvas.drawText(drawable.percentage, drawable.percentageX, drawable.percentageY, getPLValuePaint(drawable.percentage));
+                canvas.drawText(drawable.text1, drawable.xText1, drawable.yText1, mPaintFactory.getPLPaint());
+                if (!TextUtils.isEmpty(drawable.text2)) {
+                    canvas.drawText(drawable.text2, drawable.xText2, drawable.yText2, getPLValuePaint(drawable.text2));
                 }
             }
         }
@@ -196,28 +210,33 @@ public class ProfileChartView extends View implements ProfileChart {
 
     private void drawOthers(Canvas canvas, int index) {
         drawStroke(canvas, index, mAngleManager.getStartAngle(index), mAngleManager.getTotalSweepAngle());
+        float sweepAngle = mAngleManager.getTotalSweepAngle();
+        obtainLabelInfo(canvas, mAngleManager.getStartAngle(index), sweepAngle, mOthersString, Utils.angleToPercentage(Math.abs(sweepAngle)), mPaintFactory.getInstrumentNamePaint(index));
+        drawLabel(canvas, index);
         if (mIsDebugMode) {
-            float sweepAngle = mAngleManager.getTotalSweepAngle();
-            drawDebugElements(canvas, mOthersString, Utils.angleToPercentage(Math.abs(sweepAngle)), mAngleManager.getStartAngle(index), sweepAngle);
+            drawDebugElements(canvas, mAngleManager.getStartAngle(index), sweepAngle);
         }
     }
 
-    private void drawDebugElements(Canvas canvas, String instrumentName, String percentage, float startAngle, float sweepAngle) {
+    private void drawDebugElements(Canvas canvas, float startAngle, float sweepAngle) {
         mDebug.drawCenterOfSector(canvas, startAngle, sweepAngle);
-        mDebug.drawText(canvas, startAngle, sweepAngle, instrumentName, percentage);
         mDebug.drawSectorLine(canvas, startAngle);
     }
 
-    private static class Drawable {
-        String instrumentName;
-        String percentage;
-        float instrumentNameX;
-        float instrumentNameY;
-        float percentageX;
-        float percentageY;
+    /**
+     * Holds the information to draw on Canvas.
+     */
+    private static class InfoHolder {
+        String text1;
+        float xText1;
+        float yText1;
+
+        String text2;
+        float xText2;
+        float yText2;
     }
 
-    private void initDrawable(String instrumentName, String plValue) {
+    private void initInstrumentPlInfoHolders(String instrumentName, String plValue) {
         float width = getPLTextWidth(instrumentName, plValue);
         RectF allowRectF = Utils.getRectFAroundCircle(mArcRadius, mSelectedArcWidth);
         float xShift = -width / 2;
@@ -226,14 +245,14 @@ public class ProfileChartView extends View implements ProfileChart {
             initClipDrawable(instrumentName, plValue, allowRectF.width(), yShift);
         } else {
             float instrumentNameWidth = Utils.getWidth(mPaintFactory.getPLPaint(), instrumentName);
-            Drawable drawable = new Drawable();
-            drawable.instrumentName = instrumentName;
-            drawable.percentage = plValue;
-            drawable.instrumentNameX = xShift;
-            drawable.instrumentNameY = yShift;
-            drawable.percentageX = xShift + instrumentNameWidth;
-            drawable.percentageY = yShift;
-            mDrawables.add(drawable);
+            InfoHolder drawable = new InfoHolder();
+            drawable.text1 = instrumentName;
+            drawable.text2 = plValue;
+            drawable.xText1 = xShift;
+            drawable.yText1 = yShift;
+            drawable.xText2 = xShift + instrumentNameWidth;
+            drawable.yText2 = yShift;
+            mTextInCircleInfoHolders.add(drawable);
         }
     }
 
@@ -244,16 +263,16 @@ public class ProfileChartView extends View implements ProfileChart {
         String clipPLValue = getClipPLValue(indexInString, ellipsizedPLText);
         ellipsizedPLText = getEllipsizedPLTextWithoutPLValue(ellipsizedPLText, indexInString);
         float xShift = -ellipsizedPLTextWidth / 2;
-        Drawable drawable = new Drawable();
-        drawable.instrumentName = ellipsizedPLText;
-        drawable.instrumentNameX = xShift;
-        drawable.instrumentNameY = yShift;
+        InfoHolder drawable = new InfoHolder();
+        drawable.text1 = ellipsizedPLText;
+        drawable.xText1 = xShift;
+        drawable.yText1 = yShift;
         if (!TextUtils.isEmpty(clipPLValue)) {
-            drawable.percentage = clipPLValue;
-            drawable.percentageX = xShift + Utils.getWidth(mPaintFactory.getPLPaint(), ellipsizedPLText);
-            drawable.percentageY = yShift;
+            drawable.text2 = clipPLValue;
+            drawable.xText2 = xShift + Utils.getWidth(mPaintFactory.getPLPaint(), ellipsizedPLText);
+            drawable.yText2 = yShift;
         }
-        mDrawables.add(drawable);
+        mTextInCircleInfoHolders.add(drawable);
     }
 
     private String getEllipsizedPLText(final String instrumentName, final String pLValue, float avail) {
@@ -302,21 +321,132 @@ public class ProfileChartView extends View implements ProfileChart {
         return isDecValue ? mPaintFactory.getDecPLValuePaint() : mPaintFactory.getIncPLValuePaint();
     }
 
+    public void obtainLabelInfo(Canvas canvas, final float startAngle, final float sweetAngle,
+                                final String instrumentName, final String percentage, Paint paint) {
+
+        float commonWidth = Math.max(Utils.getWidth(paint, instrumentName),
+                Utils.getWidth(paint, percentage));
+        float instrumentHeight = Utils.getHeight(paint, instrumentName);
+        float percentageHeight = Utils.getHeight(paint, percentage);
+        float commonHeight = instrumentHeight + percentageHeight + mPercentageBottomMargin;
+        RectF textBox = getTextRectF(startAngle, sweetAngle, commonWidth, commonHeight);
+        float angle = getAngle(startAngle, sweetAngle);
+        float halfOfDiagonal = getHalfOfDiagonal(textBox, angle);
+        float distanceToCenterOfTextBox = getDistanceToCenterOfRectF(textBox);
+        textBox = getShiftedRectF(textBox, startAngle, sweetAngle, halfOfDiagonal + distanceToCenterOfTextBox);
+        float xPercentage = textBox.left;
+        float yPercentage = textBox.top + percentageHeight;
+        float xShift = getXShift(textBox, angle, getRadius());
+
+        InfoHolder drawable = new InfoHolder();
+        drawable.text1 = percentage;
+        drawable.xText1 = xPercentage + xShift;
+        drawable.yText1 = yPercentage;
+
+        yPercentage += instrumentHeight + mPercentageBottomMargin;
+
+        drawable.text2 = instrumentName;
+        drawable.xText2 = xPercentage + xShift;
+        drawable.yText2 = yPercentage;
+        mLabelInfoHolders.add(drawable);
+
+        canvas.drawText(drawable.text1, drawable.xText1, drawable.yText1, paint);
+        canvas.drawText(drawable.text2, drawable.xText2, drawable.yText2, paint);
+
+    }
+
+    private RectF getTextRectF(final float startAngle,
+                               final float sweetAngle,
+                               final float width,
+                               final float height) {
+        return Utils.getTextRectF(getRadius(), startAngle, sweetAngle, width, height);
+    }
+
+    private float getRadius() {
+        return mArcRadius + mCircleMargin;
+    }
+
+    private float getHalfOfDiagonal(final RectF rectF, float angle) {
+        float diagonal;
+        if (Double.compare(Math.sin(angle * Math.PI / 180), 0) != 0) {
+            diagonal = (float) (Math.abs(rectF.height() / 2 / Math.sin(angle * Math.PI / 180)));
+        } else {
+            diagonal = rectF.height() / 2;
+        }
+        return Math.min(diagonal, rectF.height() / 2);
+    }
+
+    private float getAngle(final float startAngle, final float sweetAngle) {
+        return startAngle + sweetAngle / 2;
+    }
+
+    private float getDistanceToCenterOfRectF(final RectF rectF) {
+        float cX = rectF.centerX();
+        float cY = rectF.centerY();
+        return (float) Math.sqrt(cX * cX + cY * cY);
+    }
+
+    private RectF getShiftedRectF(final RectF rectF, final float startAngle, final float sweetAngle, float distance) {
+        return Utils.getTextRectF(distance, startAngle, sweetAngle, rectF.width(), rectF.height());
+    }
+
+    private float getXCoordinateOfIntersectionBetweenCircleAndRectF(final RectF textBox, final float angle, float radius) {
+        float y;
+        if (-angle >= 180 && -angle <= 360) {
+            y = textBox.top;
+        } else {
+            y = textBox.bottom;
+        }
+        return (float) (Math.sqrt(radius * radius - y * y));
+    }
+
+    private float getXShift(final RectF textBox, final float angle, float radius) {
+        float xIntersection = getXCoordinateOfIntersectionBetweenCircleAndRectF(textBox, angle, radius);
+
+        float xShift;
+        if (-angle >= 90 && -angle <= 270) {
+            xIntersection = -xIntersection;
+            xShift = xIntersection - textBox.right;
+        } else {
+            xShift = xIntersection - textBox.left;
+        }
+
+        if (-angle > 85 && -angle < 105) {
+            xShift = 0;
+        }
+
+        if (-angle > 265 && -angle < 275) {
+            xShift = 0;
+        }
+        return xShift;
+    }
+
     @Override
     public void draw(final List<PortfolioBreakdown> breakdownList) {
         if (breakdownList != null) {
             mBreakdownList = breakdownList;
-            for (PortfolioBreakdown breakdown : breakdownList) {
-                if (breakdown.isDrawable()) {
-                    initDrawable(getPLInstrumentName(breakdown.getInstrumentName()), breakdown.getPLPercentage());
-                }
-            }
             mAngleManager = new AngleManagerImpl(PieDirection.COUNTERCLOCKWISE, breakdownList);
+            obtainInfoHolders(breakdownList, mAngleManager);
             if (mPieTouchListener != null) {
                 mPieTouchListener.setBreakdownList(mBreakdownList);
                 mPieTouchListener.setAngleManager(mAngleManager);
             }
             invalidate();
+        }
+    }
+
+    private void obtainInfoHolders(final List<PortfolioBreakdown> breakdownList, AngleManager angleManager) {
+        if (mTextInCircleInfoHolders != null) {
+            mTextInCircleInfoHolders.clear();
+            int index = 0;
+            for (PortfolioBreakdown breakdown : breakdownList) {
+                if (breakdown.isDrawable()) {
+                    initInstrumentPlInfoHolders(getPLInstrumentName(breakdown.getInstrumentName()), breakdown.getPLPercentage());
+                    float sweepAngle = mAngleManager.getTotalSweepAngle();
+                    //obtainLabelInfo(angleManager.getStartAngle(index), sweepAngle, mOthersString, Utils.angleToPercentage(Math.abs(sweepAngle)), mPaintFactory.getInstrumentNamePaint(index));
+                    index++;
+                }
+            }
         }
     }
 

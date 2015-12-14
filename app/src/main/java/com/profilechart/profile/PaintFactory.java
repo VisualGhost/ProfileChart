@@ -15,9 +15,9 @@ public interface PaintFactory {
 
     Paint getDecPLValuePaint(); // -3.57
 
-    Paint getPercentagePaint(); // 18.13%
+    Paint getPercentagePaint(int index); // 18.13%
 
-    Paint getInstrumentNamePaint(); // USDILS
+    Paint getInstrumentNamePaint(int index); // USDILS
 
     TextPaint getPLTextPaint();
 

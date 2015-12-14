@@ -27,8 +27,6 @@ public interface PortfolioDebug {
      */
     void drawCenterOfSector(Canvas canvas, float startAngle, float sweetAngle);
 
-    void drawText(Canvas canvas, float startAngle, float sweetAngle, String instrumentName, String percentage);
-
     /**
      * Draws the line indicating the new sector.
      *
