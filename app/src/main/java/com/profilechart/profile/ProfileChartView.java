@@ -154,21 +154,19 @@ public class ProfileChartView extends View implements ProfileChart {
 
     private void drawChartElements(Canvas canvas) {
         if (mBreakdownList != null && mBreakdownList.size() > 0
-                && mAngleManager != null && mLabelInfoHolders!=null && mTextInCircleInfoHolders!=null) {
-            int index = 0;
-            for (PortfolioBreakdown breakdown : mBreakdownList) {
-                if (breakdown != null && breakdown.isDrawable()) {
-                    drawInstrumentSector(canvas, index, breakdown);
-                    index++;
-                }
+                && mAngleManager != null && mLabelInfoHolders != null
+                && mTextInCircleInfoHolders != null) {
+            int i;
+            for (i = 0; i < mSectorCount; i++) {
+                drawInstrumentSector(canvas, i);
             }
             if (Float.compare(mAngleManager.getTotalSweepAngle(), 0) != 0) {
-                drawOthers(canvas, index);
+                drawOthers(canvas, i);
             }
         }
     }
 
-    private void drawInstrumentSector(Canvas canvas, int index, PortfolioBreakdown breakdown) {
+    private void drawInstrumentSector(Canvas canvas, int index) {
         drawStroke(canvas, index, mAngleManager.getStartAngle(index), mAngleManager.getSweepAngle(index));
         drawTextInsideCircle(canvas, index);
         drawLabel(canvas, index);
@@ -446,7 +444,6 @@ public class ProfileChartView extends View implements ProfileChart {
             if (Float.compare(mAngleManager.getTotalSweepAngle(), 0) != 0) {
                 float sweepAngle = mAngleManager.getTotalSweepAngle();
                 obtainLabelInfo(angleManager.getStartAngle(index), sweepAngle, mOthersString, Utils.angleToPercentage(Math.abs(sweepAngle)), mPaintFactory.getInstrumentNamePaint(index));
-                index++;
             }
             mSectorCount = index;
         }
