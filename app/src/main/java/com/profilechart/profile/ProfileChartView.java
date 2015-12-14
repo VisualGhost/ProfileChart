@@ -6,6 +6,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.View;
@@ -453,5 +455,59 @@ public class ProfileChartView extends View implements ProfileChart {
     public void selectSector(final int index) {
         mSelectedSectorIndex = index;
         invalidate();
+    }
+
+    static class SavedState extends BaseSavedState {
+        private List<PortfolioBreakdown> breakdownList = new ArrayList<>();
+
+        SavedState(Parcelable superState) {
+            super(superState);
+        }
+
+        protected SavedState(Parcel in) {
+            super(in);
+            in.readList(breakdownList, PortfolioBreakdown.class.getClassLoader());
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            super.writeToParcel(out, flags);
+            out.writeList(breakdownList);
+        }
+
+        public static final Parcelable.Creator<SavedState> CREATOR =
+                new Parcelable.Creator<SavedState>() {
+                    public SavedState createFromParcel(Parcel in) {
+                        return new SavedState(in);
+                    }
+
+                    public SavedState[] newArray(int size) {
+                        return new SavedState[size];
+                    }
+                };
+    }
+
+    @Override
+    protected Parcelable onSaveInstanceState() {
+
+        Parcelable superState = super.onSaveInstanceState();
+
+        SavedState state = new SavedState(superState);
+        state.breakdownList = mBreakdownList;
+        return state;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        if (!(state instanceof SavedState)) {
+            super.onRestoreInstanceState(state);
+            return;
+        }
+
+        SavedState savedState = (SavedState) state;
+        super.onRestoreInstanceState(savedState.getSuperState());
+
+        mBreakdownList = savedState.breakdownList;
+        draw(mBreakdownList);
     }
 }

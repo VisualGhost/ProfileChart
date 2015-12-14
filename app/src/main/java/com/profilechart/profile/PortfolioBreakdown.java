@@ -1,6 +1,8 @@
 package com.profilechart.profile;
 
-public interface PortfolioBreakdown {
+import android.os.Parcelable;
+
+public interface PortfolioBreakdown extends Parcelable{
 
     String getInstrumentName();
 

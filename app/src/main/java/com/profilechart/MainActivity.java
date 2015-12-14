@@ -17,6 +17,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ProfileChart profileChart = (ProfileChart) findViewById(R.id.profileChartView);
         List<PortfolioBreakdown> breakdownList = Utils.getBreakdownList(null);
-        profileChart.draw(breakdownList);
+        if (savedInstanceState == null) {
+            profileChart.draw(breakdownList);
+        }
     }
 }

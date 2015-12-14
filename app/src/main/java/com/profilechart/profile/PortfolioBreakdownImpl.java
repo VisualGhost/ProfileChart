@@ -1,5 +1,8 @@
 package com.profilechart.profile;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 public class PortfolioBreakdownImpl implements PortfolioBreakdown {
 
     private static final float MIN_ANGLE_TO_DRAW = 54f; // We don't draw the pie if it's less than 15% (24 = 360*0.15)
@@ -20,6 +23,15 @@ public class PortfolioBreakdownImpl implements PortfolioBreakdown {
         mAllocationPercentage = allocationPercentage;
         mPLPercentage = PLPercentage;
         mAngle = Utils.percentageToAngle(allocationPercentage);
+    }
+
+    public PortfolioBreakdownImpl(Parcel in) {
+        String[] strings = new String[3];
+        in.readStringArray(strings);
+        mInstrumentName = strings[0];
+        mAllocationPercentage = strings[1];
+        mPLPercentage = strings[2];
+        mAngle = Utils.percentageToAngle(mAllocationPercentage);
     }
 
     @Override
@@ -46,4 +58,24 @@ public class PortfolioBreakdownImpl implements PortfolioBreakdown {
     public boolean isDrawable() {
         return Float.compare(mAngle, MIN_ANGLE_TO_DRAW) >= 0;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(final Parcel dest, final int flags) {
+        dest.writeStringArray(new String[]{mInstrumentName, mAllocationPercentage, mPLPercentage});
+    }
+
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
+        public PortfolioBreakdownImpl createFromParcel(Parcel in) {
+            return new PortfolioBreakdownImpl(in);
+        }
+
+        public PortfolioBreakdownImpl[] newArray(int size) {
+            return new PortfolioBreakdownImpl[size];
+        }
+    };
 }
