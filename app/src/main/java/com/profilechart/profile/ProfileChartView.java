@@ -169,7 +169,6 @@ public class ProfileChartView extends View implements ProfileChart {
     private void drawInstrumentSector(Canvas canvas, int index, PortfolioBreakdown breakdown) {
         drawStroke(canvas, index, mAngleManager.getStartAngle(index), mAngleManager.getSweepAngle(index));
         drawTextInsideCircle(canvas, index);
-        obtainLabelInfo(canvas, mAngleManager.getStartAngle(index), mAngleManager.getSweepAngle(index), breakdown.getInstrumentName(), breakdown.getAllocationPercentage(), mPaintFactory.getInstrumentNamePaint(index));
         drawLabel(canvas, index);
         if (mIsDebugMode) {
             drawDebugElements(canvas, mAngleManager.getStartAngle(index), mAngleManager.getSweepAngle(index));
@@ -211,7 +210,6 @@ public class ProfileChartView extends View implements ProfileChart {
     private void drawOthers(Canvas canvas, int index) {
         drawStroke(canvas, index, mAngleManager.getStartAngle(index), mAngleManager.getTotalSweepAngle());
         float sweepAngle = mAngleManager.getTotalSweepAngle();
-        obtainLabelInfo(canvas, mAngleManager.getStartAngle(index), sweepAngle, mOthersString, Utils.angleToPercentage(Math.abs(sweepAngle)), mPaintFactory.getInstrumentNamePaint(index));
         drawLabel(canvas, index);
         if (mIsDebugMode) {
             drawDebugElements(canvas, mAngleManager.getStartAngle(index), sweepAngle);
@@ -321,7 +319,7 @@ public class ProfileChartView extends View implements ProfileChart {
         return isDecValue ? mPaintFactory.getDecPLValuePaint() : mPaintFactory.getIncPLValuePaint();
     }
 
-    public void obtainLabelInfo(Canvas canvas, final float startAngle, final float sweetAngle,
+    public void obtainLabelInfo(final float startAngle, final float sweetAngle,
                                 final String instrumentName, final String percentage, Paint paint) {
 
         float commonWidth = Math.max(Utils.getWidth(paint, instrumentName),
@@ -349,10 +347,6 @@ public class ProfileChartView extends View implements ProfileChart {
         drawable.xText2 = xPercentage + xShift;
         drawable.yText2 = yPercentage;
         mLabelInfoHolders.add(drawable);
-
-        canvas.drawText(drawable.text1, drawable.xText1, drawable.yText1, paint);
-        canvas.drawText(drawable.text2, drawable.xText2, drawable.yText2, paint);
-
     }
 
     private RectF getTextRectF(final float startAngle,
@@ -442,10 +436,14 @@ public class ProfileChartView extends View implements ProfileChart {
             for (PortfolioBreakdown breakdown : breakdownList) {
                 if (breakdown.isDrawable()) {
                     initInstrumentPlInfoHolders(getPLInstrumentName(breakdown.getInstrumentName()), breakdown.getPLPercentage());
-                    float sweepAngle = mAngleManager.getTotalSweepAngle();
-                    //obtainLabelInfo(angleManager.getStartAngle(index), sweepAngle, mOthersString, Utils.angleToPercentage(Math.abs(sweepAngle)), mPaintFactory.getInstrumentNamePaint(index));
+                    float sweepAngle = mAngleManager.getSweepAngle(index);
+                    obtainLabelInfo(angleManager.getStartAngle(index), sweepAngle, breakdown.getInstrumentName(), breakdown.getAllocationPercentage(), mPaintFactory.getInstrumentNamePaint(index));
                     index++;
                 }
+            }
+            if (Float.compare(mAngleManager.getTotalSweepAngle(), 0) != 0) {
+                float sweepAngle = mAngleManager.getTotalSweepAngle();
+                obtainLabelInfo(angleManager.getStartAngle(index), sweepAngle, mOthersString, Utils.angleToPercentage(Math.abs(sweepAngle)), mPaintFactory.getInstrumentNamePaint(index));
             }
         }
     }
