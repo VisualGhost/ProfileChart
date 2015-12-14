@@ -155,11 +155,14 @@ public class Utils {
     // TODO parse cursor. Remove this method
     public static List<PortfolioBreakdown> getBreakdownList(Cursor cursor) {
         List<PortfolioBreakdown> list = new ArrayList<>();
-        list.add(new PortfolioBreakdownImpl("ADIDAS", "0.25", "0.232918"));
-        list.add(new PortfolioBreakdownImpl("AUDJPY", "0.50", "-0.000253"));
+        list.add(new PortfolioBreakdownImpl("ADIDAS", "0.151", "0.232918"));
+        list.add(new PortfolioBreakdownImpl("AUDJPY", "0.20", "-0.000253"));
         list.add(new PortfolioBreakdownImpl("USDJPY", "0.150099", "0.000253"));
-//      list.add(new PortfolioBreakdownImpl("USDJPY", "0.200099", "0.00253"));
-////        list.add(new PortfolioBreakdownImpl("USDJPY", "0.180099", "0.000253"));
+        list.add(new PortfolioBreakdownImpl("USDJPY", "0.1500099", "0.00253"));
+        list.add(new PortfolioBreakdownImpl("USDJPY", "0.150099", "0.000253"));
+        list.add(new PortfolioBreakdownImpl("USDJPY", "0.140099", "0.000253"));
+        list.add(new PortfolioBreakdownImpl("BLABLA", "0.160099", "0.000253"));
+        list.add(new PortfolioBreakdownImpl("KUKUKU", "0.140099", "0.000253"));
         return list;
     }
 

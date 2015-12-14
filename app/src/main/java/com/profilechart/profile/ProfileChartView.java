@@ -38,6 +38,7 @@ public class ProfileChartView extends View implements ProfileChart {
     private int mPLIncValueTextColor;
     private int mPLDecValueTextColor;
     private int mSelectedSectorIndex = -1;
+    private int mSectorCount;
     private String mPlString;
     private String mOthersString;
     private List<InfoHolder> mTextInCircleInfoHolders;
@@ -152,7 +153,8 @@ public class ProfileChartView extends View implements ProfileChart {
     }
 
     private void drawChartElements(Canvas canvas) {
-        if (mBreakdownList != null && mBreakdownList.size() > 0 && mAngleManager != null) {
+        if (mBreakdownList != null && mBreakdownList.size() > 0
+                && mAngleManager != null && mLabelInfoHolders!=null && mTextInCircleInfoHolders!=null) {
             int index = 0;
             for (PortfolioBreakdown breakdown : mBreakdownList) {
                 if (breakdown != null && breakdown.isDrawable()) {
@@ -444,7 +446,9 @@ public class ProfileChartView extends View implements ProfileChart {
             if (Float.compare(mAngleManager.getTotalSweepAngle(), 0) != 0) {
                 float sweepAngle = mAngleManager.getTotalSweepAngle();
                 obtainLabelInfo(angleManager.getStartAngle(index), sweepAngle, mOthersString, Utils.angleToPercentage(Math.abs(sweepAngle)), mPaintFactory.getInstrumentNamePaint(index));
+                index++;
             }
+            mSectorCount = index;
         }
     }
 

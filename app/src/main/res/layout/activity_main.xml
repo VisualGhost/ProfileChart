@@ -25,7 +25,7 @@
         app:pLValueIncTextColor="@color/profile_chart_pl_value_inc_color"
         app:percentageBottomMargin="@dimen/profile_chart_percentage_bottom_margin"
         app:percentageTextSize="@dimen/profile_chart_percentage_text_size"
-        app:profileChartDebugMode="true"
+        app:profileChartDebugMode="false"
         app:profileChartScale="3"
         app:strokeRadius="@dimen/profile_chart_stroke_radius"
         app:strokeWidth="@dimen/profile_chart_stroke_width"

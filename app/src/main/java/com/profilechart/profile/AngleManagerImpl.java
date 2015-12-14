@@ -6,19 +6,19 @@ public class AngleManagerImpl implements AngleManager {
 
     private final float[] mAngles;
     private PieDirection mPieDirection;
+    private float mSum = 0;
 
     public AngleManagerImpl(PieDirection pieDirection, final List<PortfolioBreakdown> breakdownList) {
         mPieDirection = pieDirection;
         mAngles = new float[breakdownList.size() + 1];
-        float sum = 0;
         int i = 0;
         for (PortfolioBreakdown portfolioBreakdown : breakdownList) {
             if (portfolioBreakdown.isDrawable()) {
-                mAngles[i++] = sum;
-                sum += portfolioBreakdown.getAngle();
+                mAngles[i++] = mSum;
+                mSum += portfolioBreakdown.getAngle();
             }
         }
-        mAngles[i] = sum;
+        mAngles[i] = mSum;
     }
 
     private int getMultiplier() {
@@ -61,9 +61,9 @@ public class AngleManagerImpl implements AngleManager {
     @Override
     public float getTotalSweepAngle() {
         if (mPieDirection == PieDirection.COUNTERCLOCKWISE) {
-            return mAngles[mAngles.length - 1] - 360;
+            return mSum - 360;
         } else {
-            return 360 - mAngles[mAngles.length - 1];
+            return 360 - mSum;
         }
     }
 
